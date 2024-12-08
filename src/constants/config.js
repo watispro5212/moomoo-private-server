@@ -11,5 +11,7 @@ module.exports = {
     playerScale: 35,
 	playerSpeed: 0.0016,
 	playerDecel: 0.993,
-    mapScale: 14400
+    mapScale: 14400,
+    maxScreenWidth: 1920,
+    maxScreenHeight: 1080
 };

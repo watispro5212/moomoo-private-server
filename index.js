@@ -242,6 +242,23 @@ setInterval(() => {
                 }
             }
 
+            let gameObjectsData = [];
+
+            for (let i = 0; i < gameObjects.length; i++) {
+                let tmpObj = gameObjects[i];
+        
+                if (tmpObj.active) {
+                    if (!tmpObj.sentTo[player.id] && tmpObj.visibleToPlayer(player)) {
+                        tmpObj.sentTo[player.id] = 1;
+                        gameObjectsData.push(tmpObj.sid, tmpObj.x, tmpObj.y, tmpObj.dir, tmpObj.scale, tmpObj.type, tmpObj.id, tmpObj?.owner?.sid);
+                    }
+                }
+            }
+
+            if (gameObjectsData.length) {
+                player.send(Packets.SERVER_TO_CLIENT.LOAD_GAME_OBJECT, gameObjectsData);
+            }
+
             player.send(Packets.SERVER_TO_CLIENT.UPDATE_PLAYERS, data);
         }
     }

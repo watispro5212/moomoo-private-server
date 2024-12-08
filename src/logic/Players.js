@@ -462,8 +462,6 @@ module.exports = class Player {
 		let depth = Math.min(4, Math.max(1, Math.round(tmpSpeed / 40)));
 		let tMlt = 1 / depth;
 
-		let gameObjectsData = [];
-
 		for (let i = 0; i < depth; i++) {
 			if (this.xVel) this.x += (this.xVel * delta) * tMlt;
 			if (this.yVel) this.y += (this.yVel * delta) * tMlt;
@@ -476,11 +474,6 @@ module.exports = class Player {
 
 					if (tmpObj.active) {
 						ObjectManager.checkCollision(this, tmpObj, tMlt);
-
-						if (!tmpObj.sentTo[this.id] && tmpObj.visibleToPlayer(this)) {
-							tmpObj.sentTo[this.id] = 1;
-							gameObjectsData.push(tmpObj.sid, tmpObj.x, tmpObj.y, tmpObj.dir, tmpObj.scale, tmpObj.type, tmpObj.id, tmpObj?.owner?.sid);
-						}
 					}
 				}
 			}
@@ -491,10 +484,6 @@ module.exports = class Player {
 			if (players[i] != this && players[i].alive) {
 				ObjectManager.checkCollision(this, players[i]);
 			}
-		}
-
-		if (gameObjectsData.length) {
-			this.send(Packets.SERVER_TO_CLIENT.LOAD_GAME_OBJECT, gameObjectsData);
 		}
 
 		if (this.xVel) {

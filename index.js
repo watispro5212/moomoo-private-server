@@ -14,6 +14,7 @@ const Player = require("./src/logic/Players");
 const config = require("./src/constants/config");
 const UTILS = require("./src/constants/utils");
 const Packets = require("./src/constants/Packets");
+const { accessories } = require("./src/constants/store");
 
 const players = [];
 const gameObjects = [];
@@ -42,6 +43,7 @@ WebSocketServer.on("connection", (ws) => {
 
                 player.send(Packets.SERVER_TO_CLIENT.SET_UP_GAME, player.sid);
                 player.send(Packets.SERVER_TO_CLIENT.ADD_PLAYER, player.getData(), true);
+                player.resetResources();
                 sendLeaderboardData(player);
             } else if (ws.NEW_CLIENT) {
                 let player = ws.NEW_CLIENT;
@@ -50,6 +52,25 @@ WebSocketServer.on("connection", (ws) => {
                     player.send(Packets.SERVER_TO_CLIENT.PING_SOCKET);
                 } else if (type == Packets.CLIENT_TO_SERVER.MOVE) {
                     player.moveDir = data[0];
+                } else if (type == Packets.CLIENT_TO_SERVER.STORE) {
+                    let [buy, id, indx] = data;
+
+                    if (buy) {
+                        if (indx) {
+                            let item = accessories.find(e => e.id == id);
+
+                            if (item && !player.tails[id] && player.points - item.price >= 0) {
+                                player.addResource(3, -item.price);
+                            }
+                        } else {
+                            let item = hats.find(e => e.id == id);
+
+                            if (item && !player.skins[id] && player.points - item.price >= 0) {
+                                player.addResource(3, -item.price);
+                            }
+                        }
+                    } else {
+                    }
                 }
             }
         } catch (e) {

@@ -3,6 +3,7 @@ const { hats, accessories } = require("../constants/store");
 const config = require("../constants/config");
 const msgpack = require("msgpack-lite");
 const items = require("../constants/items");
+const Packets = require("../constants/Packets");
 
 var playerSIDS = 0;
 
@@ -31,8 +32,6 @@ module.exports = class Player {
         for (let i = 0; i < accessories.length; i++) {
             if (accessories[i].price <= 0) this.tails[accessories[i].id] = 1;
         }
-
-        this.resetResources();
     }
 
     send(type) {
@@ -58,6 +57,11 @@ module.exports = class Player {
     resetResources() {
 		for (let i = 0; i < config.resourceTypes.length; ++i) {
 			this[config.resourceTypes[i]] = 1e6;
+			this.send(
+				Packets.SERVER_TO_CLIENT.UPDATE_PLAYER_VALUE,
+				config.resourceTypes[i],
+				1e6
+			);
 		}
 	}
 
@@ -133,6 +137,18 @@ module.exports = class Player {
 			this.skinColor
 		];
 	}
+
+	addResource(type, amount) {
+		// if (!auto && amount > 0) this.addWeaponXP(amount);
+		
+		this[config.resourceTypes[type]] += amount;
+		this.send(
+			Packets.SERVER_TO_CLIENT.UPDATE_PLAYER_VALUE,
+			config.resourceTypes[type],
+			this[config.resourceTypes[type]],
+			1
+		);
+	};
 
 	update(delta) {
 		if (this.lockMove) {

@@ -138,7 +138,7 @@ setInterval(() => {
     for (let i = 0; i < players.length; i++) {
         let player = players[i];
 
-        if (player) {
+        if (player && player.alive) {
             player.update(config.serverUpdateSpeed);
 
             let data = [];
@@ -146,7 +146,7 @@ setInterval(() => {
             for (let t = 0; t < players.length; t++) {
                 let other = players[t];
 
-                if (other.canSee(player)) {
+                if (other.canSee(player) && other.alive) {
                     if (!player.sentTo[other.id] && player.id != other.id) {
                         player.sentTo[other.id] = true;
                         player.send(Packets.SERVER_TO_CLIENT.ADD_PLAYER, other.getData());

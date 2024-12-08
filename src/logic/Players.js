@@ -163,7 +163,50 @@ module.exports = class Player {
 		}
 	}
 
+	kill(doer) {
+		if (doer && doer.alive) {
+			doer.kills++;
+			doer.send(Packets.SERVER_TO_CLIENT.UPDATE_PLAYER_VALUE, "kills", doer.kills, 1);
+		}
+
+		this.alive = false;
+		this.send(Packets.SERVER_TO_CLIENT.KILL_PLAYER);
+	};
+
+	changeHealth(amount, doer) {
+		if (amount > 0 && this.health >= this.maxHealth) return false
+
+		let skin = hats.find(e => e.id == this.skinIndex);
+		let tail = accessories.find(e => e.id == this.tailIndex);
+
+		if (amount < 0 && skin) amount *= skin.dmgMult||1;
+		if (amount < 0 && tail) amount *= tail.dmgMult || 1;
+		if (amount < 0) this.hitTime = Date.now();
+
+		this.health += amount;
+		if (this.health > this.maxHealth) {
+			amount -= (this.health - this.maxHealth);
+			this.health = this.maxHealth;
+		}
+
+		if (this.health <= 0) this.kill(doer);
+
+		for (let i = 0; i < players.length; i++) {
+			if (this.sentTo[players[i].id] || players[i] == this) {
+				players[i].send(Packets.SERVER_TO_CLIENT.UPDATE_HEALTH, this.sid, this.health);
+			}
+		}
+
+		if (doer && doer.canSee(this) && !(doer == this && amount < 0)) {
+			doer.send(Packets.SERVER_TO_CLIENT.SHOW_TEXT, this.x, this.y, Math.round(-amount), 1);
+		}
+
+		return true;
+	};
+
 	update(delta) {
+		if (!this.alive) return;
+
 		this.timerCount -= delta;
 		if (this.timerCount <= 0) {
 			let skin = hats.find(e => e.id == this.skinIndex);
@@ -177,6 +220,8 @@ module.exports = class Player {
 
 			this.timerCount = 1e3;
 		}
+
+		if (!this.alive) return;
 
 		if (this.lockMove) {
 			this.xVel = 0;

@@ -32,3 +32,7 @@ module.exports.getAngleDist = (a, b) => {
 	let p = Math.abs(b - a) % (Math.PI * 2);
 	return (p > Math.PI ? (Math.PI * 2) - p : p);
 };
+
+module.exports.getDirection = (x1, y1, x2, y2) => {
+	return Math.atan2(y1 - y2, x1 - x2);
+};

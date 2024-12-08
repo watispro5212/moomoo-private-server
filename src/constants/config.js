@@ -15,5 +15,39 @@ module.exports = {
     maxScreenWidth: 1920,
     maxScreenHeight: 1080,
     gatherAngle: Math.PI / 2.6,
-    shieldAngle: Math.PI / 3
+    shieldAngle: Math.PI / 3,
+    maxAge: 100
 };
+
+const weaponVariants = [{
+    id: 0,
+    src: "",
+    xp: 0,
+    val: 1
+}, {
+    id: 1,
+    src: "_g",
+    xp: 3000,
+    val: 1.1
+}, {
+    id: 2,
+    src: "_d",
+    xp: 7000,
+    val: 1.18
+}, {
+    id: 3,
+    src: "_r",
+    poison: true,
+    xp: 12000,
+    val: 1.18
+}];
+
+module.exports.fetchVariant = (player) => {
+    let tmpXP = player.weapons[player.weaponIndex] || 0;
+
+    for (let i = weaponVariants.length - 1; i >= 0; i--) {
+        if (tmpXP >= weaponVariants[i].xp) return weaponVariants[i];
+    }
+};
+
+module.exports.weaponVariants = weaponVariants;

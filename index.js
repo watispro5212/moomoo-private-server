@@ -21,6 +21,7 @@ const config = require("./src/constants/config");
 const UTILS = require("./src/constants/utils");
 const Packets = require("./src/constants/Packets");
 const { hats, accessories } = require("./src/constants/store");
+const items = require("./src/constants/items");
 
 WebSocketServer.on("connection", (ws) => {
     ws.on("message", (msg) => {
@@ -110,6 +111,43 @@ WebSocketServer.on("connection", (ws) => {
                     player.autoGather = !player.autoGather;
                 } else if (type == Packets.CLIENT_TO_SERVER.SEND_AIM) {
                     player.dir = data[0];
+                } else if (type == Packets.CLIENT_TO_SERVER.SEND_UPGRADE) {
+                    if (player.upgradePoints <= 0) return;
+
+                    if (data[0] < 16) {
+                        if (data[0] < 9) {
+                            player.weapons[0] = data[0];
+
+                            if (player.weaponIndex < 9) {
+                                player.weaponIndex = data[0];
+                            }
+                        } else {
+                            player.weapons[1] = data[0];
+
+                            if (player.weaponIndex >= 9) {
+                                player.weaponIndex = data[0];
+                            }
+                        }
+
+                        player.upgradePoints--;
+                        player.upgrAge++;
+                        player.send(Packets.SERVER_TO_CLIENT.UPDATE_UPGRADES, player.upgradePoints, player.upgrAge);
+                        player.send(Packets.SERVER_TO_CLIENT.UPDATE_ITEMS, player.weapons, true);
+                    } else {
+                        let id = data[0] - 16;
+                        let item = items.list[id];
+
+                        if (item) {
+                            if (item.group) {
+                                player.items[item.group.id] = id;
+                            }
+
+                            player.upgradePoints--;
+                            player.upgrAge++;
+                            player.send(Packets.SERVER_TO_CLIENT.UPDATE_UPGRADES, player.upgradePoints, player.upgrAge);
+                            player.send(Packets.SERVER_TO_CLIENT.UPDATE_ITEMS, player.items);
+                        }
+                    }
                 }
             }
         } catch (e) {

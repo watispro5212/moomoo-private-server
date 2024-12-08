@@ -151,9 +151,33 @@ module.exports = class Player {
 			this[config.resourceTypes[type]],
 			1
 		);
-	};
+	}
+
+	earnXP(amount) {
+		if (this.age < config.maxAge) {
+			this.XP += amount;
+
+			if (this.XP >= this.maxXP) {
+				if (this.age < config.maxAge) {
+					this.age++;
+					this.XP = 0;
+					this.maxXP *= 1.2;
+				} else {
+					this.XP = this.maxXP;
+				}
+				this.upgradePoints++;
+				this.send(Packets.SERVER_TO_CLIENT.UPDATE_UPGRADES, this.upgradePoints, this.upgrAge);
+				this.send(Packets.SERVER_TO_CLIENT.UPDATE_AGE, this.XP, UTILS.fixTo(this.maxXP, 1), this.age);
+			} else {
+				this.send(Packets.SERVER_TO_CLIENT.UPDATE_AGE, this.XP);
+			}
+		}
+	}
 
 	gather() {
+		let variant = config.fetchVariant(this);
+		let variantDmg = variant.val;
+
 		for (let i = 0; i < players.length; i++) {
 			let tmpObj = players[i];
 
@@ -226,7 +250,7 @@ module.exports = class Player {
 
 		this.alive = false;
 		this.send(Packets.SERVER_TO_CLIENT.KILL_PLAYER);
-	};
+	}
 
 	changeHealth(amount, doer) {
 		if (amount > 0 && this.health >= this.maxHealth) return false
@@ -257,7 +281,7 @@ module.exports = class Player {
 		}
 
 		return true;
-	};
+	}
 
 	update(delta) {
 		if (!this.alive) return;
@@ -275,6 +299,8 @@ module.exports = class Player {
 
 			this.timerCount = 1e3;
 		}
+
+		if (this.age <= 9) this.earnXP(1e3);
 
 		if (!this.alive) return;
 

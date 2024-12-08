@@ -44,7 +44,7 @@ const weaponVariants = [{
 }];
 
 module.exports.fetchVariant = (player) => {
-    let tmpXP = player.weapons[player.weaponIndex] || 0;
+    let tmpXP = player.weaponXP[player.weaponIndex] || 0;
 
     for (let i = weaponVariants.length - 1; i >= 0; i--) {
         if (tmpXP >= weaponVariants[i].xp) return weaponVariants[i];

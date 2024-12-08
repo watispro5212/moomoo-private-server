@@ -142,8 +142,13 @@ module.exports = class Player {
 		];
 	}
 
-	addResource(type, amount) {
-		// if (!auto && amount > 0) this.addWeaponXP(amount);
+	addWeaponXP(amnt) {
+		if (!this.weaponXP[this.weaponIndex]) this.weaponXP[this.weaponIndex] = 0;
+		this.weaponXP[this.weaponIndex] += amnt;
+	}
+
+	addResource(type, amount, auto) {
+		if (!auto && amount > 0) this.addWeaponXP(amount);
 		
 		this[config.resourceTypes[type]] += amount;
 		this.send(
@@ -203,12 +208,11 @@ module.exports = class Player {
 								tmpObj.changeHealth(-wpn.dmg * variantDmg * (wpn.sDmg || 1) * (skin && skin.bDmg ? skin.bDmg : 1), this);
 
 								if (tmpObj.health <= 0) {
-									/*
-									for (var x = 0; x < tmpObj.req.length;) {
-										this.addResource(config.resourceTypes.indexOf(tmpObj.req[x]), tmpObj.req[x+1]);
-										x+=2;
+									for (let x = 0; x < tmpObj.req.length;) {
+										this.addResource(config.resourceTypes.indexOf(tmpObj.req[x]), tmpObj.req[x + 1]);
+										x += 2;
 									}
-									*/
+									
 									ObjectManager.disableObj(tmpObj);
 								}
 							}

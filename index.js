@@ -231,7 +231,7 @@ setInterval(() => {
                         other.dir,
                         other.buildIndex,
                         other.weaponIndex,
-                        other.weaponVaraint,
+                        config.fetchVariant(other).id,
                         null,
                         false,
                         other.skinIndex,

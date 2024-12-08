@@ -57,9 +57,17 @@ module.exports = class GameObject {
         this.spawnPoint = data.spawnPoint;
     }
 
+    visibleToPlayer(player) {
+		return !(this.hideFromEnemy) || (this.owner && this.owner == player);
+	}
+
     getScale(sM, ig) {
         sM = sM || 1;
         return this.scale * ((this.isItem || this.type == 2 || this.type == 3 || this.type == 4) ? 1 : (0.6 * sM)) * (ig ? 1 : this.colDiv);
+    }
+
+    changeHealth(amount, doer) {
+        this.health += amount;
     }
 
     update(delta) {

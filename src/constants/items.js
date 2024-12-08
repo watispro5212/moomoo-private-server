@@ -417,6 +417,7 @@ const list = [{
     desc: "restores 20 health when consumed",
     req: ["food", 10],
     scale: 22,
+    consume: true,
     holdOffset: 15
 }, {
     age: 3,
@@ -425,6 +426,7 @@ const list = [{
     desc: "restores 40 health when consumed",
     req: ["food", 15],
     scale: 27,
+    consume: true,
     holdOffset: 15
 }, {
     age: 7,
@@ -433,6 +435,7 @@ const list = [{
     desc: "restores 30 health and another 50 over 5 seconds",
     req: ["food", 25],
     scale: 27,
+    consume: true,
     holdOffset: 15
 }, {
     group: groups[1],

@@ -16,7 +16,8 @@ module.exports = {
     maxScreenHeight: 1080,
     gatherAngle: Math.PI / 2.6,
     shieldAngle: Math.PI / 3,
-    maxAge: 100
+    maxAge: 100,
+    riverWidth: 724
 };
 
 const weaponVariants = [{

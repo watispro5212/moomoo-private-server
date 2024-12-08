@@ -139,7 +139,16 @@ WebSocketServer.on("connection", (ws) => {
 
                         if (item) {
                             if (item.group) {
-                                player.items[item.group.id] = id;
+                                let groupId = 0;
+
+                                if (item.group.name == "food") groupId = 0;
+                                if (item.group.name == "walls") groupId = 1;
+                                if (item.group.name == "spikes") groupId = 2;
+                                if (item.group.name == "mill") groupId = 3;
+                                if (item.group.name == "trap" || item.group.name == "booster") groupId = 4;
+                                if (["turret", "blocker", "teleporter", "watchtower"].includes(item.group.name)) groupId = 5;
+
+                                player.items[groupId] = id;
                             }
 
                             player.upgradePoints--;
@@ -158,6 +167,20 @@ WebSocketServer.on("connection", (ws) => {
                     } else {
                         player.buildIndex = -1;
                         player.weaponIndex = data[0];
+                    }
+                } else if (type == Packets.CLIENT_TO_SERVER.SEND_HIT) {
+                    if (data[1] == null || data[1] == undefined) data[1] = 0;
+
+                    player.dir = data[1];
+
+                    if (data[0]) {
+                        if (player.buildIndex >= 0) {
+                            player.buildItem(items.list[player.buildIndex]);
+                        } else {
+                            player.mouseState = 1;
+                        }
+                    } else {
+                        player.mouseState = 0;
                     }
                 }
             }

@@ -4,7 +4,8 @@ const config = require("../constants/config");
 const msgpack = require("msgpack-lite");
 const items = require("../constants/items");
 const Packets = require("../constants/Packets");
-const { players } = require("../../index");
+const { players, gameObjects } = require("../../index");
+const ObjectManager = require("./ObjectManager");
 
 var playerSIDS = 0;
 
@@ -175,8 +176,50 @@ module.exports = class Player {
 	}
 
 	gather() {
+		let wpn = items.weapons[this.weaponIndex];
 		let variant = config.fetchVariant(this);
 		let variantDmg = variant.val;
+
+		let skin = hats.find(e => e.id == this.skinIndex);
+
+		let hitObjs = {};
+		let hitSomething = false;
+		let tmpList = ObjectManager.getGridArrays(this.x, this.y, wpn.range);
+
+		for (let t = 0; t < tmpList.length; t++) {
+			for (let i = 0; i < tmpList[t].length; i++) {
+				let tmpObj = tmpList[t][i];
+
+				if (tmpObj.active && !tmpObj.dontGather && !hitObjs[tmpObj.sid] && tmpObj.visibleToPlayer(this)) {
+					let tmpDist = UTILS.getDistance(this.x, this.y, tmpObj.x, tmpObj.y) - tmpObj.scale;
+
+					if (tmpDist <= wpn.range) {
+						let tmpDir = UTILS.getDirection(tmpObj.x, tmpObj.y, this.x, this.y);
+
+						if (UTILS.getAngleDist(tmpDir, this.dir) <= config.gatherAngle) {
+							hitObjs[tmpObj.sid] = 1;
+
+							if (tmpObj.health) {
+								tmpObj.changeHealth(-wpn.dmg * variantDmg * (wpn.sDmg || 1) * (skin && skin.bDmg ? skin.bDmg : 1), this);
+
+								if (tmpObj.health <= 0) {
+									/*
+									for (var x = 0; x < tmpObj.req.length;) {
+										this.addResource(config.resourceTypes.indexOf(tmpObj.req[x]), tmpObj.req[x+1]);
+										x+=2;
+									}
+									*/
+									ObjectManager.disableObj(tmpObj);
+								}
+							}
+
+							hitSomething = true;
+							ObjectManager.hitObj(tmpObj, tmpDir);
+						}
+					}
+				}
+			}
+		}
 
 		for (let i = 0; i < players.length; i++) {
 			let tmpObj = players[i];
@@ -237,7 +280,7 @@ module.exports = class Player {
 			let player = players[i];
 
 			if (player == this || (this.sentTo[player.id] && this.canSee(player))) {
-				player.send(Packets.SERVER_TO_CLIENT.GATHER_ANIMATION, this.sid, 0 /* hitSomething */, this.weaponIndex);
+				player.send(Packets.SERVER_TO_CLIENT.GATHER_ANIMATION, this.sid, hitSomething, this.weaponIndex);
 			}
 		}
 	}
@@ -250,6 +293,87 @@ module.exports = class Player {
 
 		this.alive = false;
 		this.send(Packets.SERVER_TO_CLIENT.KILL_PLAYER);
+	}
+
+	changeItemCount(id, value) {
+		this.itemCounts[id] = this.itemCounts[id] || 0;
+		this.itemCounts[id] += value;
+
+		this.send(Packets.SERVER_TO_CLIENT.UPDATE_ITEM_COUNTS, id, this.itemCounts[id]);
+	}
+
+	buildItem(item) {
+		let tmpScale = this.scale + item.scale + (item.placeOffset || 0);
+		let tmpX = this.x + (tmpScale * Math.cos(this.dir));
+		let tmpY = this.y + (tmpScale * Math.sin(this.dir));
+
+		if (item.consume || ObjectManager.checkItem(
+			tmpX,
+			tmpY,
+			item.scale,
+			.6,
+			item.id,
+			false,
+			this
+		)) {
+			let done = false;
+
+			if (item.consume) {
+				if (this.hitTime) {
+					let timeSinceHit = Date.now() - this.hitTime;
+					this.hitTime = 0;
+
+					if (timeSinceHit <= config.serverUpdateSpeed) {
+						this.shameCount++;
+
+						if (this.shameCount >= 8) {
+							this.shameTimer = 30e3;
+							this.shameCount = 0;
+						}
+					} else {
+						this.shameCount -= 2;
+
+						if (this.shameCount <= 0) {
+							this.shameCount = 0;
+						}
+					}
+				}
+
+				if (this.shameTimer <= 0) {
+					done = true;
+
+					if (item.name == "apple") {
+						this.changeHealth(20, this);
+					} else if (item.name == "cookie") {
+						this.changeHealth(40, this);
+					} else if (item.name == "cheese") {
+						this.changeHealth(30, this);
+					}
+				}
+			} else {
+				done = true;
+
+				if (item.group.limit) {
+					this.changeItemCount(item.group.id, 1);
+				}
+
+				ObjectManager.add(
+					gameObjects.length,
+					tmpX,
+					tmpY,
+					this.dir,
+					item.scale,
+					item.type,
+					item,
+					false,
+					this
+				);
+			}
+
+			if (done) {
+				this.buildIndex = -1;
+			}
+		}
 	}
 
 	changeHealth(amount, doer) {
@@ -334,9 +458,32 @@ module.exports = class Player {
 		let depth = Math.min(4, Math.max(1, Math.round(tmpSpeed / 40)));
 		let tMlt = 1 / depth;
 
+		let gameObjectsData = [];
+
 		for (let i = 0; i < depth; i++) {
 			if (this.xVel) this.x += (this.xVel * delta) * tMlt;
 			if (this.yVel) this.y += (this.yVel * delta) * tMlt;
+
+			let tmpList = ObjectManager.getGridArrays(this.x, this.y, this.scale);
+
+			for (let x = 0; x < tmpList.length; ++x) {
+				for (let y = 0; y < tmpList[x].length; ++y) {
+					let tmpObj = tmpList[x][y];
+
+					if (tmpObj.active) {
+						if (!tmpObj.sentTo[this.id]) {
+							tmpObj.sentTo[this.id] = 1;
+							gameObjectsData.push(tmpObj.sid, tmpObj.x, tmpObj.y, tmpObj.dir, tmpObj.scale, tmpObj.type, tmpObj.id, tmpObj?.owner?.sid);
+						}
+
+						ObjectManager.checkCollision(this, tmpObj, tMlt);
+					}
+				}
+			}
+		}
+
+		if (gameObjectsData.length) {
+			this.send(Packets.SERVER_TO_CLIENT.LOAD_GAME_OBJECT, gameObjectsData);
 		}
 
 		if (this.xVel) {

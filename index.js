@@ -148,6 +148,17 @@ WebSocketServer.on("connection", (ws) => {
                             player.send(Packets.SERVER_TO_CLIENT.UPDATE_ITEMS, player.items);
                         }
                     }
+                } else if (type == Packets.CLIENT_TO_SERVER.SELECT_TO_BUILD) {
+                    if (!data[1]) {
+                        if (player.buildIndex == data[0]) {
+                            player.buildIndex = -1;
+                        } else {
+                            player.buildIndex = data[0];
+                        }
+                    } else {
+                        player.buildIndex = -1;
+                        player.weaponIndex = data[0];
+                    }
                 }
             }
         } catch (e) {

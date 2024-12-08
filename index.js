@@ -25,14 +25,25 @@ WebSocketServer.on("connection", (ws) => {
             let [type, data] = UTILS.decodeSocketMessages(msg);
 
             if (type == Packets.CLIENT_TO_SERVER.JOIN_GAME) {
+                let player = ws.NEW_CLIENT;
+
                 if (!ws.NEW_CLIENT) {
-                    let player = new Player();
+                    player = new Player(ws);
 
                     ws.NEW_CLIENT = player;
+                    players.push(player);
                 }
 
-                ws.NEW_CLIENT.setUserData(data[0]);
-                ws.NEW_CLIENT.spawn();
+                player.setUserData(data[0]);
+                player.spawn();
+
+                player.send(Packets.SERVER_TO_CLIENT.SET_UP_GAME, player.sid);
+            } else if (ws.NEW_CLIENT) {
+                let player = ws.NEW_CLIENT;
+
+                if (type == Packets.CLIENT_TO_SERVER.PING_SOCKET) {
+                    player.send(Packets.SERVER_TO_CLIENT.PING_SOCKET);
+                }
             }
         } catch (e) {
             console.log(e);

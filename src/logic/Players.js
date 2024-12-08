@@ -1,11 +1,14 @@
 const UTILS = require("../constants/utils");
 const { hats, accessories } = require("../constants/store");
 const config = require("../constants/config");
+const msgpack = require("msgpack-lite");
 
 var playerSIDS = 0;
 
 module.exports = class Player {
-    constructor() {
+    constructor(ws) {
+        this.ws = ws;
+
         this.sid = playerSIDS++;
         this.id = UTILS.randString(7);
 
@@ -29,6 +32,13 @@ module.exports = class Player {
         }
 
         this.resetResources();
+    }
+
+    send(type) {
+        let data = Array.prototype.slice.call(arguments, 1);
+        let binary = msgpack.encode([type, data]);
+
+        this.ws.send(binary);
     }
 
     resetMoveDir() {
@@ -81,7 +91,7 @@ module.exports = class Player {
 		this.speed = config.playerSpeed;
 
 		this.resetMoveDir();
-		this.resetResources(moofoll);
+		this.resetResources();
 
 		this.items = [0, 3, 6, 10];
 		this.weapons = [0];

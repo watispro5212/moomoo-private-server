@@ -155,6 +155,61 @@ module.exports = class Player {
 
 	gather() {
 		for (let i = 0; i < players.length; i++) {
+			let tmpObj = players[i];
+
+			if (tmpObj != this && tmpObj.alive) {
+				let tmpDist = UTILS.getDistance(this.x, this.y, tmpObj.x, tmpObj.y) - (tmpObj.scale * 1.8);
+				let wpn = items.weapons[this.weaponIndex];
+
+				if (tmpDist <= wpn.range) {
+					let tmpDir = UTILS.getDirection(tmpObj.x, tmpObj.y, this.x, this.y);
+
+					if (UTILS.getAngleDist(tmpDir, this.dir) <= config.gatherAngle) {
+						let skin = hats.find(e => e.id == this.skinIndex);
+						let tail = accessories.find(e => e.id == this.tailIndex);
+
+						let tmp = {
+							skin: hats.find(e => e.id == tmpObj.skinIndex),
+							tail: accessories.find(e => e.id == tmpObj.tailIndex)
+						}
+
+						let dmgMlt = variantDmg;
+
+						if (tmpObj.weaponIndex != undefined && wpn.shield && UTILS.getAngleDist(tmpDir+Math.PI, tmpObj.dir) <= config.shieldAngle) {
+							dmgMlt = wpn.shield;
+						}
+
+						let dmgVal = wpn.dmg *
+							(skin && skin.dmgMultO ? skin.dmgMultO : 1) *
+							(tail && tail.dmgMultO ? tail.dmgMultO : 1);
+
+						let tmpSpd = .3 + (wpn.knock || 0);
+						tmpObj.xVel += tmpSpd * Math.cos(tmpDir);
+						tmpObj.yVel += tmpSpd * Math.sin(tmpDir);
+
+						if (skin && skin.healD) {
+							this.changeHealth(dmgVal * dmgMlt * tmp.skin.healD, this);
+						}
+
+						if (tail && tail.healD) {
+							this.changeHealth(dmgVal * dmgMlt * tmp.tail.healD, this);
+						}
+
+						if (tmp.skin && tmp.skin.dmg) this.changeHealth(-dmgVal * tmp.skin.dmg, tmpObj);
+						if (tmp.tail && tmp.tail.dmg) this.changeHealth(-dmgVal * tmp.tail.dmg, tmpObj);
+
+						if (tmp.skin && tmp.skin.dmgK) {
+							this.xVel -= tmp.skin.dmgK * Math.cos(tmpDir);
+							this.yVel -= tmp.skin.dmgK * Math.sin(tmpDir);
+						}
+
+						tmpObj.changeHealth(-dmgVal * dmgMlt, this);
+					}
+				}
+			}
+		}
+
+		for (let i = 0; i < players.length; i++) {
 			let player = players[i];
 
 			if (player == this || (this.sentTo[player.id] && this.canSee(player))) {

@@ -13,5 +13,7 @@ module.exports = {
 	playerDecel: 0.993,
     mapScale: 14400,
     maxScreenWidth: 1920,
-    maxScreenHeight: 1080
+    maxScreenHeight: 1080,
+    gatherAngle: Math.PI / 2.6,
+    shieldAngle: Math.PI / 3
 };

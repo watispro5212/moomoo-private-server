@@ -14,7 +14,7 @@ const Player = require("./src/logic/Players");
 const config = require("./src/constants/config");
 const UTILS = require("./src/constants/utils");
 const Packets = require("./src/constants/Packets");
-const { accessories } = require("./src/constants/store");
+const { hats, accessories } = require("./src/constants/store");
 
 const players = [];
 const gameObjects = [];
@@ -54,20 +54,34 @@ WebSocketServer.on("connection", (ws) => {
                     player.moveDir = data[0];
                 } else if (type == Packets.CLIENT_TO_SERVER.STORE) {
                     let [buy, id, indx] = data;
+                    let done = false;
 
                     if (buy) {
                         if (indx) {
                             let item = accessories.find(e => e.id == id);
 
                             if (item && !player.tails[id] && player.points - item.price >= 0) {
+                                player.tails[id] = 1;
                                 player.addResource(3, -item.price);
+                                done = true;
                             }
                         } else {
                             let item = hats.find(e => e.id == id);
 
                             if (item && !player.skins[id] && player.points - item.price >= 0) {
+                                player.skins[id] = 1;
                                 player.addResource(3, -item.price);
+                                done = true;
                             }
+                        }
+
+                        if (done) {
+                            player.send(
+                                Packets.SERVER_TO_CLIENT.UPDATE_STORE_ITEMS,
+                                0,
+                                id,
+                                indx
+                            );
                         }
                     } else {
                     }
@@ -87,6 +101,10 @@ WebSocketServer.on("connection", (ws) => {
                     players[i].send(Packets.SERVER_TO_CLIENT.REMOVE_PLAYER, CLIENT_ID);
                 }
             }
+
+            let indx = players.findIndex(e => e.id == CLIENT_ID);
+            players.splice(indx, 1);
+            sendLeaderboardData();
         }
     });
 });

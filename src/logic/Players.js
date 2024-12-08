@@ -4,6 +4,7 @@ const config = require("../constants/config");
 const msgpack = require("msgpack-lite");
 const items = require("../constants/items");
 const Packets = require("../constants/Packets");
+const { players } = require("../../index");
 
 var playerSIDS = 0;
 
@@ -150,6 +151,16 @@ module.exports = class Player {
 		);
 	};
 
+	gather() {
+		for (let i = 0; i < players.length; i++) {
+			let player = players[i];
+
+			if (player == this || (this.sentTo[player.id] && this.canSee(player))) {
+				player.send(Packets.SERVER_TO_CLIENT.GATHER_ANIMATION, this.sid, 0 /* hitSomething */, this.weaponIndex);
+			}
+		}
+	}
+
 	update(delta) {
 		if (this.lockMove) {
 			this.xVel = 0;
@@ -206,6 +217,52 @@ module.exports = class Player {
 			this.y = this.scale;
 		} else if (this.y + this.scale > config.mapScale) {
 			this.y = config.mapScale - this.scale;
+		}
+
+		if (this.buildIndex == -1) {
+			if (this.reloads[this.weaponIndex] > 0) {
+				this.reloads[this.weaponIndex] -= delta;
+			} else if (this.autoGather) {
+				let done = true;
+				let skin = hats.find(e => e.id == this.skinIndex);
+				let wpn = items.weapons[this.weaponIndex];
+
+				if (wpn.gather != undefined) {
+					this.gather();
+				} else {
+					done = false;
+				}
+
+				if (done) {
+					this.reloads[this.weaponIndex] = wpn.speed * (skin ? (skin.atkSpd || 1) : 1);
+				}
+				/*
+				var worked = true;
+				if (items.weapons[this.weaponIndex].gather != undefined) {
+					this.gather(players);
+				} else if (items.weapons[this.weaponIndex].projectile != undefined &&
+					this.hasRes(items.weapons[this.weaponIndex], (this.skin?this.skin.projCost:0))) {
+					this.useRes(items.weapons[this.weaponIndex], (this.skin?this.skin.projCost:0));
+					this.noMovTimer = 0;
+					var tmpIndx = items.weapons[this.weaponIndex].projectile;
+					var projOffset = this.scale * 2;
+					var aMlt = (this.skin&&this.skin.aMlt)?this.skin.aMlt:1;
+					if (items.weapons[this.weaponIndex].rec) {
+						this.xVel -= items.weapons[this.weaponIndex].rec * mathCOS(this.dir);
+						this.yVel -= items.weapons[this.weaponIndex].rec * mathSIN(this.dir);
+					}
+					projectileManager.addProjectile(this.x+(projOffset*mathCOS(this.dir)),
+						this.y+(projOffset*mathSIN(this.dir)), this.dir, items.projectiles[tmpIndx].range*aMlt,
+						items.projectiles[tmpIndx].speed*aMlt, tmpIndx, this, null, this.zIndex);
+				} else {
+					worked = false;
+				}
+				this.gathering = this.mouseState;
+				if (worked) {
+					this.reloads[this.weaponIndex] = items.weapons[this.weaponIndex].speed*(this.skin?(this.skin.atkSpd||1):1);
+				}
+				*/
+			}
 		}
 	}
 }

@@ -10,16 +10,17 @@ const server = app.listen(1234, () => {
 
 const WebSocketServer = new WebSocket.WebSocketServer({ noServer: true });
 
+const players = [];
+const gameObjects = [];
+
+module.exports.players = players;
+module.exports.gameObjects = gameObjects;
+
 const Player = require("./src/logic/Players");
 const config = require("./src/constants/config");
 const UTILS = require("./src/constants/utils");
 const Packets = require("./src/constants/Packets");
 const { hats, accessories } = require("./src/constants/store");
-
-const players = [];
-const gameObjects = [];
-
-module.exports.gameObjects = gameObjects;
 
 WebSocketServer.on("connection", (ws) => {
     ws.on("message", (msg) => {
@@ -67,7 +68,7 @@ WebSocketServer.on("connection", (ws) => {
                             }
                         } else {
                             let item = hats.find(e => e.id == id);
-
+                            
                             if (item && !player.skins[id] && player.points - item.price >= 0) {
                                 player.skins[id] = 1;
                                 player.addResource(3, -item.price);
@@ -84,7 +85,31 @@ WebSocketServer.on("connection", (ws) => {
                             );
                         }
                     } else {
+                        if (indx) {
+                            if (player.tails[id]) {
+                                player.tailIndex = id;
+                                done = true;
+                            }
+                        } else {
+                            if (player.skins[id]) {
+                                player.skinIndex = id;
+                                done = true;
+                            }
+                        }
+
+                        if (done) {
+                            player.send(
+                                Packets.SERVER_TO_CLIENT.UPDATE_STORE_ITEMS,
+                                1,
+                                id,
+                                indx
+                            );
+                        }
                     }
+                } else if (type == Packets.CLIENT_TO_SERVER.AUTO_GATHER) {
+                    player.autoGather = !player.autoGather;
+                } else if (type == Packets.CLIENT_TO_SERVER.SEND_AIM) {
+                    player.dir = data[0];
                 }
             }
         } catch (e) {
@@ -174,8 +199,27 @@ function sendLeaderboardData(Client) {
     }
 }
 
+function sendMinimapData() {
+    let data = [];
+
+    for (let i = 0; i < players.length; i++) {
+        let player = players[i];
+
+        if (player) {
+            data.push(player.x, player.y);
+        }
+    }
+
+    for (let i = 0; i < players.length; i++) {
+        let player = players[i];
+
+        if (player) player.send(Packets.SERVER_TO_CLIENT.UPDATE_MINIMAP, data);
+    }
+}
+
 setInterval(() => {
     sendLeaderboardData();
+    sendMinimapData();
 }, 3e3);
 
 server.on("upgrade", (request, socket, head) => {

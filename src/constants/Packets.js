@@ -37,6 +37,7 @@ module.exports = {
         ADD_PROJ: "X",
         REM_PROJ: "Y",
         UPDATE_STORE_ITEMS: "5",
-        SHOW_TEXT: "8"
+        SHOW_TEXT: "8",
+        UPDATE_MINIMAP: "7"
     }
 };

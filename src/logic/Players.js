@@ -26,6 +26,8 @@ module.exports = class Player {
         this.moveDir = undefined;
         this.skinColor = 0;
 
+		this.timerCount = 1e3;
+
         for (let i = 0; i < hats.length; i++) {
             if (hats[i].price <= 0) this.skins[hats[i].id] = 1;
         }
@@ -162,6 +164,20 @@ module.exports = class Player {
 	}
 
 	update(delta) {
+		this.timerCount -= delta;
+		if (this.timerCount <= 0) {
+			let skin = hats.find(e => e.id == this.skinIndex);
+			let tail = accessories.find(e => e.id == this.tailIndex);
+
+			let regenAmount = (tail && tail.healthRegen ? tail.healthRegen : 0) + (skin && skin.healthRegen ? skin.healthRegen : 0);
+
+			if (regenAmount) {
+				this.changeHealth(regenAmount, this);
+			}
+
+			this.timerCount = 1e3;
+		}
+
 		if (this.lockMove) {
 			this.xVel = 0;
 			this.yVel = 0;

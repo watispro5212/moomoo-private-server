@@ -471,14 +471,21 @@ module.exports = class Player {
 					let tmpObj = tmpList[x][y];
 
 					if (tmpObj.active) {
-						if (!tmpObj.sentTo[this.id]) {
+						ObjectManager.checkCollision(this, tmpObj, tMlt);
+
+						if (!tmpObj.sentTo[this.id] && tmpObj.visibleToPlayer(this)) {
 							tmpObj.sentTo[this.id] = 1;
 							gameObjectsData.push(tmpObj.sid, tmpObj.x, tmpObj.y, tmpObj.dir, tmpObj.scale, tmpObj.type, tmpObj.id, tmpObj?.owner?.sid);
 						}
-
-						ObjectManager.checkCollision(this, tmpObj, tMlt);
 					}
 				}
+			}
+		}
+
+		let tmpIndx = players.indexOf(this);
+		for (let i = tmpIndx + 1; i < players.length; i++) {
+			if (players[i] != this && players[i].alive) {
+				ObjectManager.checkCollision(this, players[i]);
 			}
 		}
 

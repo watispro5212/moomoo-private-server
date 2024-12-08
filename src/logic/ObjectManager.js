@@ -200,18 +200,6 @@ module.exports = class ObjectManager {
         }
 
         return true;
-
-        for (var i = 0; i < gameObjects.length; ++i) {
-            var blockS = (gameObjects[i].blocker ?
-                gameObjects[i].blocker : gameObjects[i].getScale(sM, gameObjects[i].isItem));
-            if (gameObjects[i].active && UTILS.getDistance(x, y, gameObjects[i].x,
-                gameObjects[i].y) < (s + blockS))
-                return false;
-        } if (!ignoreWater && indx != 18 && y >= (config.mapScale / 2) - (config.riverWidth / 2) && y <=
-            (config.mapScale / 2) + (config.riverWidth / 2)) {
-            return false;
-        }
-        return true;
     }
 
     static add(sid, x, y, dir, s, type, data, setSID, owner) {

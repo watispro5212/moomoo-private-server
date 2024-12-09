@@ -3,6 +3,7 @@ const Packets = require("../constants/Packets");
 const ObjectManager = require("./ObjectManager");
 const items = require("../constants/items");
 const config = require("../constants/config");
+const UTILS = require("../constants/utils");
 
 module.exports = class projectile {
     init(indx, x, y, dir, spd, dmg, rng, scl, owner) {

@@ -526,17 +526,19 @@ module.exports = class Player {
 					let projOffset = this.scale * 2;
 					let aMlt = (skin && skin.aMlt) ? skin.aMlt : 1;
 
+					let proj = items.projectiles[tmpIndx];
+
 					if (wpn.rec) {
 						this.xVel -= wpn.rec * Math.cos(this.dir);
 						this.yVel -= wpn.rec * Math.sin(this.dir);
 					}
 
 					ProjectileManager.addProjectile(
-						this.x + (projOffset * mathCOS(this.dir)),
-						this.y + (projOffset * mathSIN(this.dir)),
+						this.x + (projOffset * Math.cos(this.dir)),
+						this.y + (projOffset * Math.sin(this.dir)),
 						this.dir,
-						wpn.range * aMlt,
-						wpn.speed * aMlt,
+						proj.range * aMlt,
+						proj.speed * aMlt,
 						tmpIndx,
 						this,
 						null,

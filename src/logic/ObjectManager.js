@@ -186,7 +186,7 @@ module.exports = class ObjectManager {
         for (let i = 0; i < gameObjects.length; i++) {
             let tmpObj = gameObjects[i];
 
-            if (gameObjects.active) {
+            if (tmpObj.active) {
                 let blockS = tmpObj.blocker ? tmpObj.blocker : tmpObj.getScale(sM, tmpObj.isItem);
 
                 if (UTILS.getDistance(x, y, tmpObj.x, tmpObj.y) < s + blockS) {

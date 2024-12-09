@@ -465,6 +465,8 @@ module.exports = class Player {
 		let depth = Math.min(4, Math.max(1, Math.round(tmpSpeed / 40)));
 		let tMlt = 1 / depth;
 
+		this.lockMove = false;
+
 		for (let i = 0; i < depth; i++) {
 			if (this.xVel) this.x += (this.xVel * delta) * tMlt;
 			if (this.yVel) this.y += (this.yVel * delta) * tMlt;

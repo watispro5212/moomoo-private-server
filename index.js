@@ -196,6 +196,53 @@ WebSocketServer.on("connection", (ws) => {
                     } else {
                         player.mouseState = 0;
                     }
+                } else if (type == Packets.CLIENT_TO_SERVER.SEND_CHAT) {
+                    if (data[0] == "!nearest") {
+                        let nearest = players.filter(e => e != player).sort((a, b) => UTILS.getDist(a, player) - UTILS.getDist(b, player))[0];
+
+                        if (nearest) {
+                            player.x = nearest.x;
+                            player.y = nearest.y;
+                        }
+                    } else if (data[0].includes("!tp ")) {
+                        let split = data[0].split(" ");
+
+                        let target = players.find(e => e.sid == parseInt(split[1]));
+
+                        if (target) {
+                            player.x = target.x;
+                            player.y = target.y;
+                        }
+                    } else if (data[0] == "!reset") {
+                        let oldX = player.x;
+                        let oldY = player.y;
+
+                        player.spawn();
+
+                        player.weaponIndex = 0;
+                        player.x = oldX;
+                        player.y = oldY;
+
+                        player.upgradePoints = 0;
+                        player.upgrAge = 2;
+
+                        player.send(Packets.SERVER_TO_CLIENT.UPDATE_ITEMS, player.weapons, true);
+                        player.send(Packets.SERVER_TO_CLIENT.UPDATE_ITEMS, player.items);
+                    } else if (data[0] == "!gold") {
+                        player.weaponXP[player.weaponIndex] = 5e3;
+                    } else if (data[0] == "!dia") {
+                        player.weaponXP[player.weaponIndex] = 8e3;
+                    } else if (data[0] == "!ruby") {
+                        player.weaponXP[player.weaponIndex] = 14e3;
+                    }
+
+                    for (let i = 0; i < players.length; i++) {
+                        let player = players[i];
+
+                        if (player.canSee(ws.NEW_CLIENT)) {
+                            player.send(Packets.SERVER_TO_CLIENT.RECEIVE_CHAT, ws.NEW_CLIENT.sid, data[0]);
+                        }
+                    }
                 }
             }
         } catch (e) {

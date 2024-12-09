@@ -511,7 +511,7 @@ module.exports = class Player {
 			this.y = config.mapScale - this.scale;
 		}
 
-		if (this.reloads[53] == null || this.reloads[53] == undefined) this.reloads[53] = 0;
+		if (this.reloads[53] == null || this.reloads[53] == undefined) this.reloads[53] = 2500;
 
 		if (this.reloads[53] > 0) {
 			this.reloads[53] -= delta;
@@ -526,7 +526,7 @@ module.exports = class Player {
 			for (let i = 0; i < players.length; i++) {
 				let player = players[i];
 
-				if (this != player && player.canSee(this) && UTILS.getDist(player, this) <= 700) {
+				if (this != player && player.alive && player.canSee(this) && UTILS.getDist(player, this) <= 700) {
 					enemies.push(player);
 				}
 			}

@@ -280,14 +280,14 @@ setInterval(() => {
     for (let i = 0; i < projectiles.length; i++) {
         let projectile = projectiles[i];
 
-        if (projectile) {
+        if (projectile && projectile.active) {
             projectile.update(config.serverUpdateSpeed);
         }
     }
 }, config.serverUpdateSpeed);
 
 function sendLeaderboardData(Client) {
-    let sorted = players.sort((a, b) => b.points - a.points);
+    let sorted = players.filter(e => e.alive).sort((a, b) => b.points - a.points);
     let data = [];
 
     for (let i = 0; i < 10; i++) {
@@ -316,7 +316,7 @@ function sendMinimapData() {
     for (let i = 0; i < players.length; i++) {
         let player = players[i];
 
-        if (player) {
+        if (player && player.alive) {
             data.push(player.x, player.y);
         }
     }

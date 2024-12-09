@@ -36,3 +36,39 @@ module.exports.getAngleDist = (a, b) => {
 module.exports.getDirection = (x1, y1, x2, y2) => {
 	return Math.atan2(y1 - y2, x1 - x2);
 };
+
+module.exports.lineInRect = (recX, recY, recX2, recY2, x1, y1, x2, y2) => {
+	let minX = x1;
+	let maxX = x2;
+
+	if (x1 > x2) {
+		minX = x2;
+		maxX = x1;
+	}
+	if (maxX > recX2) maxX = recX2;
+	if (minX < recX) minX = recX;
+	if (minX > maxX) return false;
+
+	let minY = y1;
+	let maxY = y2;
+	let dx = x2 - x1;
+
+	if (Math.abs(dx) > 0.0000001) {
+		let a = (y2 - y1) / dx;
+		let b = y1 - a * x1;
+		minY = a * minX + b;
+		maxY = a * maxX + b;
+	}
+
+	if (minY > maxY) {
+		let tmp = maxY;
+		maxY = minY;
+		minY = tmp;
+	}
+
+	if (maxY > recY2) maxY = recY2;
+	if (minY < recY) minY = recY;
+	if (minY > maxY) return false;
+
+	return true;
+};

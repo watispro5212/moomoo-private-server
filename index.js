@@ -12,9 +12,11 @@ const WebSocketServer = new WebSocket.WebSocketServer({ noServer: true });
 
 const players = [];
 const gameObjects = [];
+const projectiles = [];
 
 module.exports.players = players;
 module.exports.gameObjects = gameObjects;
+module.exports.projectiles = projectiles;
 
 const Player = require("./src/logic/Players");
 const config = require("./src/constants/config");
@@ -22,6 +24,18 @@ const UTILS = require("./src/constants/utils");
 const Packets = require("./src/constants/Packets");
 const { hats, accessories } = require("./src/constants/store");
 const items = require("./src/constants/items");
+
+for (let i = 0; i < 75; i++) {
+    let player = new Player();
+    players.push(player);
+
+    player.setUserData({
+        name: `BOT:${i}`,
+        skin: 0
+    });
+    player.spawn();
+    player.resetResources();
+}
 
 WebSocketServer.on("connection", (ws) => {
     ws.on("message", (msg) => {
@@ -260,6 +274,14 @@ setInterval(() => {
             }
 
             player.send(Packets.SERVER_TO_CLIENT.UPDATE_PLAYERS, data);
+        }
+    }
+
+    for (let i = 0; i < projectiles.length; i++) {
+        let projectile = projectiles[i];
+
+        if (projectile) {
+            projectile.update(config.serverUpdateSpeed);
         }
     }
 }, config.serverUpdateSpeed);

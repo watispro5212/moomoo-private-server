@@ -6,46 +6,49 @@ const items = require("../constants/items");
 const Packets = require("../constants/Packets");
 const { players, gameObjects } = require("../../index");
 const ObjectManager = require("./ObjectManager");
+const ProjectileManager = require("./ProjectileManager");
 
 var playerSIDS = 0;
 
 module.exports = class Player {
-    constructor(ws) {
-        this.ws = ws;
+	constructor(ws) {
+		this.ws = ws;
 
-        this.sid = playerSIDS++;
-        this.id = UTILS.randString(7);
+		this.sid = playerSIDS++;
+		this.id = UTILS.randString(7);
 
-        this.team = null;
-        this.skinIndex = 0;
-        this.tailIndex = 0;
-        this.tails = {};
-        this.skins = {};
+		this.team = null;
+		this.skinIndex = 0;
+		this.tailIndex = 0;
+		this.tails = {};
+		this.skins = {};
 
-        this.itemCounts = {};
-        this.isPlayer = true;
-        this.moveDir = undefined;
-        this.skinColor = 0;
+		this.itemCounts = {};
+		this.isPlayer = true;
+		this.moveDir = undefined;
+		this.skinColor = 0;
 
 		this.timerCount = 1e3;
 
-        for (let i = 0; i < hats.length; i++) {
-            if (hats[i].price <= 0) this.skins[hats[i].id] = 1;
-        }
+		for (let i = 0; i < hats.length; i++) {
+			if (hats[i].price <= 0) this.skins[hats[i].id] = 1;
+		}
 
-        for (let i = 0; i < accessories.length; i++) {
-            if (accessories[i].price <= 0) this.tails[accessories[i].id] = 1;
-        }
-    }
+		for (let i = 0; i < accessories.length; i++) {
+			if (accessories[i].price <= 0) this.tails[accessories[i].id] = 1;
+		}
+	}
 
-    send(type) {
-        let data = Array.prototype.slice.call(arguments, 1);
-        let binary = msgpack.encode([type, data]);
+	send(type) {
+		if (this.ws) {
+			let data = Array.prototype.slice.call(arguments, 1);
+			let binary = msgpack.encode([type, data]);
+	
+			this.ws.send(binary);
+		}
+	}
 
-        this.ws.send(binary);
-    }
-
-    resetMoveDir() {
+	resetMoveDir() {
 		this.moveDir = undefined;
 	}
 
@@ -58,7 +61,7 @@ module.exports = class Player {
 		return dx <= (config.maxScreenWidth / 2) * 1.3 && dy <= (config.maxScreenHeight / 2) * 1.3;
 	}
 
-    resetResources() {
+	resetResources() {
 		for (let i = 0; i < config.resourceTypes.length; ++i) {
 			this[config.resourceTypes[i]] = 1e6;
 			this.send(
@@ -69,8 +72,8 @@ module.exports = class Player {
 		}
 	}
 
-    spawn() {
-        this.active = true;
+	spawn() {
+		this.active = true;
 		this.alive = true;
 		this.lockMove = false;
 		this.lockDir = false;
@@ -118,14 +121,14 @@ module.exports = class Player {
 		this.shootCount = 0;
 		this.weaponXP = [];
 		this.reloads = {};
-    }
+	}
 
-    setUserData(data) {
-        if (data) {
-            this.name = data.name;
-            this.skinColor = config.skinColors[data.skin];
-        }
-    }
+	setUserData(data) {
+		if (data) {
+			this.name = data.name;
+			this.skinColor = config.skinColors[data.skin];
+		}
+	}
 
 	getData() {
 		return [
@@ -149,7 +152,7 @@ module.exports = class Player {
 
 	addResource(type, amount, auto) {
 		if (!auto && amount > 0) this.addWeaponXP(amount);
-		
+
 		this[config.resourceTypes[type]] += amount;
 		this.send(
 			Packets.SERVER_TO_CLIENT.UPDATE_PLAYER_VALUE,
@@ -209,10 +212,10 @@ module.exports = class Player {
 
 								if (tmpObj.health <= 0) {
 									for (let x = 0; x < tmpObj.req.length;) {
-										this.addResource(config.resourceTypes.indexOf(tmpObj.req[x]), tmpObj.req[x + 1]);
+										this.addResource(config.resourceTypes.indexOf(tmpObj.req[x]), tmpObj.req[x + 1] * 5);
 										x += 2;
 									}
-									
+
 									ObjectManager.disableObj(tmpObj);
 								}
 							}
@@ -246,7 +249,7 @@ module.exports = class Player {
 
 						let dmgMlt = variantDmg;
 
-						if (tmpObj.weaponIndex != undefined && wpn.shield && UTILS.getAngleDist(tmpDir+Math.PI, tmpObj.dir) <= config.shieldAngle) {
+						if (tmpObj.weaponIndex != undefined && wpn.shield && UTILS.getAngleDist(tmpDir + Math.PI, tmpObj.dir) <= config.shieldAngle) {
 							dmgMlt = wpn.shield;
 						}
 
@@ -386,7 +389,7 @@ module.exports = class Player {
 		let skin = hats.find(e => e.id == this.skinIndex);
 		let tail = accessories.find(e => e.id == this.tailIndex);
 
-		if (amount < 0 && skin) amount *= skin.dmgMult||1;
+		if (amount < 0 && skin) amount *= skin.dmgMult || 1;
 		if (amount < 0 && tail) amount *= tail.dmgMult || 1;
 		if (amount < 0) this.hitTime = Date.now();
 
@@ -490,7 +493,7 @@ module.exports = class Player {
 			this.xVel *= Math.pow(config.playerDecel, delta);
 			if (this.xVel <= 0.01 && this.xVel >= -0.01) this.xVel = 0;
 		}
-		
+
 		if (this.yVel) {
 			this.yVel *= Math.pow(config.playerDecel, delta);
 			if (this.yVel <= 0.01 && this.yVel >= -0.01) this.yVel = 0;
@@ -501,7 +504,7 @@ module.exports = class Player {
 		} else if (this.x + this.scale > config.mapScale) {
 			this.x = config.mapScale - this.scale;
 		}
-		
+
 		if (this.y - this.scale < 0) {
 			this.y = this.scale;
 		} else if (this.y + this.scale > config.mapScale) {
@@ -518,6 +521,27 @@ module.exports = class Player {
 
 				if (wpn.gather != undefined) {
 					this.gather();
+				} else if (wpn.projectile != null) {
+					let tmpIndx = wpn.projectile;
+					let projOffset = this.scale * 2;
+					let aMlt = (skin && skin.aMlt) ? skin.aMlt : 1;
+
+					if (wpn.rec) {
+						this.xVel -= wpn.rec * Math.cos(this.dir);
+						this.yVel -= wpn.rec * Math.sin(this.dir);
+					}
+
+					ProjectileManager.addProjectile(
+						this.x + (projOffset * mathCOS(this.dir)),
+						this.y + (projOffset * mathSIN(this.dir)),
+						this.dir,
+						wpn.range * aMlt,
+						wpn.speed * aMlt,
+						tmpIndx,
+						this,
+						null,
+						this.zIndex
+					);
 				} else {
 					done = false;
 				}
@@ -525,32 +549,6 @@ module.exports = class Player {
 				if (done) {
 					this.reloads[this.weaponIndex] = wpn.speed * (skin ? (skin.atkSpd || 1) : 1);
 				}
-				/*
-				var worked = true;
-				if (items.weapons[this.weaponIndex].gather != undefined) {
-					this.gather(players);
-				} else if (items.weapons[this.weaponIndex].projectile != undefined &&
-					this.hasRes(items.weapons[this.weaponIndex], (this.skin?this.skin.projCost:0))) {
-					this.useRes(items.weapons[this.weaponIndex], (this.skin?this.skin.projCost:0));
-					this.noMovTimer = 0;
-					var tmpIndx = items.weapons[this.weaponIndex].projectile;
-					var projOffset = this.scale * 2;
-					var aMlt = (this.skin&&this.skin.aMlt)?this.skin.aMlt:1;
-					if (items.weapons[this.weaponIndex].rec) {
-						this.xVel -= items.weapons[this.weaponIndex].rec * mathCOS(this.dir);
-						this.yVel -= items.weapons[this.weaponIndex].rec * mathSIN(this.dir);
-					}
-					projectileManager.addProjectile(this.x+(projOffset*mathCOS(this.dir)),
-						this.y+(projOffset*mathSIN(this.dir)), this.dir, items.projectiles[tmpIndx].range*aMlt,
-						items.projectiles[tmpIndx].speed*aMlt, tmpIndx, this, null, this.zIndex);
-				} else {
-					worked = false;
-				}
-				this.gathering = this.mouseState;
-				if (worked) {
-					this.reloads[this.weaponIndex] = items.weapons[this.weaponIndex].speed*(this.skin?(this.skin.atkSpd||1):1);
-				}
-				*/
 			}
 		}
 	}

@@ -72,3 +72,11 @@ module.exports.lineInRect = (recX, recY, recX2, recY2, x1, y1, x2, y2) => {
 
 	return true;
 };
+
+module.exports.getDist = (a, b) => {
+	return Math.hypot(a.y - b.y, a.x - b.x);
+};
+
+module.exports.getDir = (a, b) => {
+	return Math.atan2(a.y - b.y, a.x - b.x);
+};

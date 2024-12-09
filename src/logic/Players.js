@@ -212,7 +212,7 @@ module.exports = class Player {
 
 								if (tmpObj.health <= 0) {
 									for (let x = 0; x < tmpObj.req.length;) {
-										this.addResource(config.resourceTypes.indexOf(tmpObj.req[x]), tmpObj.req[x + 1] * 5);
+										this.addResource(config.resourceTypes.indexOf(tmpObj.req[x]), tmpObj.req[x + 1] * 15);
 										x += 2;
 									}
 
@@ -509,6 +509,51 @@ module.exports = class Player {
 			this.y = this.scale;
 		} else if (this.y + this.scale > config.mapScale) {
 			this.y = config.mapScale - this.scale;
+		}
+
+		if (this.reloads[53] == null || this.reloads[53] == undefined) this.reloads[53] = 0;
+
+		if (this.reloads[53] > 0) {
+			this.reloads[53] -= delta;
+
+			if (this.reloads[53] <= 0) this.reloads[53] = 0;
+		}
+
+		if (this.skinIndex == 53 && !this.reloads[53]) {
+			let enemy = null;
+			let enemies = [];
+
+			for (let i = 0; i < players.length; i++) {
+				let player = players[i];
+
+				if (this != player && player.canSee(this) && UTILS.getDist(player, this) <= 700) {
+					enemies.push(player);
+				}
+			}
+
+			if (enemies.length) {
+				enemy = enemies.sort((a, b) => UTILS.getDist(a, this) - UTILS.getDist(b, this))[0];
+			}
+
+			if (enemy) {
+				let proj = items.projectiles[1];
+
+				let dir = UTILS.getDir(enemy, this);
+
+				ProjectileManager.addProjectile(
+					this.x,
+					this.y,
+					dir,
+					proj.range,
+					proj.speed,
+					1,
+					this,
+					null,
+					this.zIndex
+				);
+
+				this.reloads[53] = 2500;
+			}
 		}
 
 		if (this.buildIndex == -1) {

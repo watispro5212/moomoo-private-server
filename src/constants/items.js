@@ -97,6 +97,8 @@ const projectiles = [{
     indx: 1,
     layer: 1,
     dmg: 25,
+    speed: 1.5,
+    range: 700,
     scale: 20
 }, {
     indx: 0,

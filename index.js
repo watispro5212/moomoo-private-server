@@ -35,6 +35,8 @@ for (let i = 0; i < 75; i++) {
     });
     player.spawn();
     player.resetResources();
+
+    if (Math.random() > .5) player.skinIndex = 6;
 }
 
 WebSocketServer.on("connection", (ws) => {
@@ -100,6 +102,9 @@ WebSocketServer.on("connection", (ws) => {
                             );
                         }
                     } else {
+                        if (Date.now() - ws.NEW_CLIENT.storeCooldown <= 50) return;
+                        ws.NEW_CLIENT.storeCooldown = Date.now();
+
                         if (indx) {
                             if (player.tails[id]) {
                                 player.tailIndex = id;
@@ -197,8 +202,8 @@ WebSocketServer.on("connection", (ws) => {
                         player.mouseState = 0;
                     }
                 } else if (type == Packets.CLIENT_TO_SERVER.SEND_CHAT) {
-                    if (data[0] == "!nearest") {
-                        let nearest = players.filter(e => e != player).sort((a, b) => UTILS.getDist(a, player) - UTILS.getDist(b, player))[0];
+                    if (data[0] == "!nearest" || data[0] == "!n") {
+                        let nearest = players.filter(e => e != player && e.alive).sort((a, b) => UTILS.getDist(a, player) - UTILS.getDist(b, player))[0];
 
                         if (nearest) {
                             player.x = nearest.x;
@@ -271,7 +276,7 @@ setInterval(() => {
     for (let i = 0; i < players.length; i++) {
         let player = players[i];
 
-        if (player && player.alive) {
+        if (player) {
             player.update(config.serverUpdateSpeed);
 
             let data = [];

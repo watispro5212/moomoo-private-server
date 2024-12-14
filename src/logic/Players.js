@@ -326,26 +326,6 @@ module.exports = class Player {
 			let done = false;
 
 			if (item.consume) {
-				if (this.hitTime) {
-					let timeSinceHit = Date.now() - this.hitTime;
-					this.hitTime = 0;
-
-					if (timeSinceHit <= config.serverUpdateSpeed) {
-						this.shameCount++;
-
-						if (this.shameCount >= 8) {
-							this.shameTimer = 30e3;
-							this.shameCount = 0;
-						}
-					} else {
-						this.shameCount -= 2;
-
-						if (this.shameCount <= 0) {
-							this.shameCount = 0;
-						}
-					}
-				}
-
 				if (this.shameTimer <= 0) {
 					done = true;
 
@@ -441,9 +421,9 @@ module.exports = class Player {
 		} else {
 			let wpn = items.weapons[this.weaponIndex];
 			let skin = hats.find(e => e.id == this.skinIndex);
-			let tail = accessories.find(e => e.id == this.skinIndex);
+			let tail = accessories.find(e => e.id == this.tailIndex);
 
-			let spdMult = (this.buildIndex >= 0 ? .5 : 1) * (wpn.spdMult || 1) *
+			let spdMult = (this.buildIndex >= 0 ? .5 : 1) * (wpn?.spdMult || 1) *
 				(skin ? (skin.spdMult || 1) : 1) *
 				(tail ? (tail.spdMult || 1) : 1);
 

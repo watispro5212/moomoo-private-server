@@ -150,8 +150,8 @@ WebSocketServer.on("connection", (ws) => {
 
                         player.upgradePoints--;
                         player.upgrAge++;
-                        player.send(Packets.SERVER_TO_CLIENT.UPDATE_UPGRADES, player.upgradePoints, player.upgrAge);
                         player.send(Packets.SERVER_TO_CLIENT.UPDATE_ITEMS, player.weapons, true);
+                        player.send(Packets.SERVER_TO_CLIENT.UPDATE_UPGRADES, player.upgradePoints, player.upgrAge);
                     } else {
                         let id = data[0] - 16;
                         let item = items.list[id];

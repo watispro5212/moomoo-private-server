@@ -25,7 +25,7 @@ const Packets = require("./src/constants/Packets");
 const { hats, accessories } = require("./src/constants/store");
 const items = require("./src/constants/items");
 
-for (let i = 0; i < 75; i++) {
+for (let i = 0; i < 150; i++) {
     let player = new Player();
     players.push(player);
 
@@ -37,6 +37,10 @@ for (let i = 0; i < 75; i++) {
     player.resetResources();
 
     if (Math.random() > .5) player.skinIndex = 6;
+
+    setInterval(() => {
+        if (player.health < 100 && player.alive) for (let t = 0; t < 3; t++) player.buildItem(items.list[player.items[0]]);
+    }, 100);
 }
 
 WebSocketServer.on("connection", (ws) => {
@@ -262,6 +266,14 @@ WebSocketServer.on("connection", (ws) => {
             for (let i = 0; i < players.length; i++) {
                 if (players[i].sentTo[CLIENT_ID]) {
                     players[i].send(Packets.SERVER_TO_CLIENT.REMOVE_PLAYER, CLIENT_ID);
+                }
+
+                for (let t = 0; t < players.length; t++) {
+                    let player = players[t];
+
+                    if (player != players[i]) {
+                        player.send(Packets.SERVER_TO_CLIENT.KILL_OBJECTS, player.sid);
+                    }
                 }
             }
 

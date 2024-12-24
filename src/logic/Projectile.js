@@ -1,11 +1,11 @@
-const { players } = require("../../index");
-const Packets = require("../constants/Packets");
-const ObjectManager = require("./ObjectManager");
-const items = require("../constants/items");
-const config = require("../constants/config");
-const UTILS = require("../constants/utils");
+import { players } from "../../index.js";
+import Packets from "../constants/Packets.js";
+import ObjectManager from "./ObjectManager.js";
+import items from "../constants/items.js";
+import config from "../constants/config.js";
+import UTILS from "../constants/utils.js";
 
-module.exports = class projectile {
+export default class projectile {
     init(indx, x, y, dir, spd, dmg, rng, scl, owner) {
         this.active = true;
         this.indx = indx;

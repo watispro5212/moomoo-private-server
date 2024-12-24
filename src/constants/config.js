@@ -1,4 +1,4 @@
-module.exports = {
+const config = {
     serverUpdateRate: 9,
     serverUpdateSpeed: 1e3 / 9,
     resourceTypes: ["wood", "food", "stone", "points"],
@@ -43,7 +43,7 @@ const weaponVariants = [{
     val: 1.18
 }];
 
-module.exports.fetchVariant = (player) => {
+const fetchVariant = (player) => {
     let tmpXP = player.weaponXP[player.weaponIndex] || 0;
 
     for (let i = weaponVariants.length - 1; i >= 0; i--) {
@@ -51,4 +51,7 @@ module.exports.fetchVariant = (player) => {
     }
 };
 
-module.exports.weaponVariants = weaponVariants;
+config.weaponVariants = weaponVariants;
+config.fetchVariant = fetchVariant;
+
+export default config;

@@ -1,8 +1,8 @@
-module.exports = {
+const Packets = {
     CLIENT_TO_SERVER: {
         JOIN_GAME: "M",
         PING_SOCKET: "0",
-        AUTO_GATHER: "K",
+        AUTO_GATHER: "K",   
         MOVE: "9",
         RESET_MOVEMENT_DIR: "e",
         SEND_CHAT: "6",
@@ -41,3 +41,5 @@ module.exports = {
         UPDATE_MINIMAP: "7"
     }
 };
+
+export default Packets;

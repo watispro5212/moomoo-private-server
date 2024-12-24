@@ -1,10 +1,10 @@
-const GameObject = require("./GameObject");
-const { gameObjects, players } = require("../../index");
-const Packets = require("../constants/Packets");
-const config = require("../constants/config");
-const UTILS = require("../constants/utils");
+import GameObject from "./GameObject.js";
+import { gameObjects, players } from "../../index.js";
+import Packets from "../constants/Packets.js";
+import config from "../constants/config.js";
+import UTILS from "../constants/utils.js";
 
-module.exports = class ObjectManager {
+export default class ObjectManager {
     static grids = {};
 
     static setObjectGrids(tmpObj) {

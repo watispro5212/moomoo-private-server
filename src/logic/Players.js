@@ -1,16 +1,16 @@
-const UTILS = require("../constants/utils");
-const { hats, accessories } = require("../constants/store");
-const config = require("../constants/config");
-const msgpack = require("msgpack-lite");
-const items = require("../constants/items");
-const Packets = require("../constants/Packets");
-const { players, gameObjects } = require("../../index");
-const ObjectManager = require("./ObjectManager");
-const ProjectileManager = require("./ProjectileManager");
+import UTILS from "../constants/utils.js";
+import store from "../constants/store.js";
+import config from "../constants/config.js";
+import msgpack from "msgpack-lite";
+import items from "../constants/items.js";
+import Packets from "../constants/Packets.js";
+import { players, gameObjects } from "../../index.js";
+import ObjectManager from "./ObjectManager.js";
+import ProjectileManager from "./ProjectileManager.js";
 
 var playerSIDS = 0;
 
-module.exports = class Player {
+export default class Player {
 	constructor(ws) {
 		this.ws = ws;
 
@@ -30,12 +30,12 @@ module.exports = class Player {
 
 		this.timerCount = 1e3;
 
-		for (let i = 0; i < hats.length; i++) {
-			if (hats[i].price <= 0) this.skins[hats[i].id] = 1;
+		for (let i = 0; i < store.hats.length; i++) {
+			if (store.hats[i].price <= 0) this.skins[store.hats[i].id] = 1;
 		}
 
-		for (let i = 0; i < accessories.length; i++) {
-			if (accessories[i].price <= 0) this.tails[accessories[i].id] = 1;
+		for (let i = 0; i < store.accessories.length; i++) {
+			if (store.accessories[i].price <= 0) this.tails[store.accessories[i].id] = 1;
 		}
 	}
 
@@ -188,7 +188,7 @@ module.exports = class Player {
 		let variant = config.fetchVariant(this);
 		let variantDmg = variant.val;
 
-		let skin = hats.find(e => e.id == this.skinIndex);
+		let skin = store.hats.find(e => e.id == this.skinIndex);
 
 		let hitObjs = {};
 		let hitSomething = false;
@@ -239,12 +239,12 @@ module.exports = class Player {
 					let tmpDir = UTILS.getDirection(tmpObj.x, tmpObj.y, this.x, this.y);
 
 					if (UTILS.getAngleDist(tmpDir, this.dir) <= config.gatherAngle) {
-						let skin = hats.find(e => e.id == this.skinIndex);
-						let tail = accessories.find(e => e.id == this.tailIndex);
+						let skin = store.hats.find(e => e.id == this.skinIndex);
+						let tail = store.accessories.find(e => e.id == this.tailIndex);
 
 						let tmp = {
-							skin: hats.find(e => e.id == tmpObj.skinIndex),
-							tail: accessories.find(e => e.id == tmpObj.tailIndex)
+							skin: store.hats.find(e => e.id == tmpObj.skinIndex),
+							tail: store.accessories.find(e => e.id == tmpObj.tailIndex)
 						}
 
 						let dmgMlt = variantDmg;
@@ -366,8 +366,8 @@ module.exports = class Player {
 	changeHealth(amount, doer) {
 		if (amount > 0 && this.health >= this.maxHealth) return false
 
-		let skin = hats.find(e => e.id == this.skinIndex);
-		let tail = accessories.find(e => e.id == this.tailIndex);
+		let skin = store.hats.find(e => e.id == this.skinIndex);
+		let tail = store.accessories.find(e => e.id == this.tailIndex);
 
 		if (amount < 0 && skin) amount *= skin.dmgMult || 1;
 		if (amount < 0 && tail) amount *= tail.dmgMult || 1;
@@ -399,8 +399,8 @@ module.exports = class Player {
 
 		this.timerCount -= delta;
 		if (this.timerCount <= 0) {
-			let skin = hats.find(e => e.id == this.skinIndex);
-			let tail = accessories.find(e => e.id == this.tailIndex);
+			let skin = store.hats.find(e => e.id == this.skinIndex);
+			let tail = store.accessories.find(e => e.id == this.tailIndex);
 
 			let regenAmount = (tail && tail.healthRegen ? tail.healthRegen : 0) + (skin && skin.healthRegen ? skin.healthRegen : 0);
 
@@ -420,8 +420,8 @@ module.exports = class Player {
 			this.yVel = 0;
 		} else {
 			let wpn = items.weapons[this.weaponIndex];
-			let skin = hats.find(e => e.id == this.skinIndex);
-			let tail = accessories.find(e => e.id == this.tailIndex);
+			let skin = store.hats.find(e => e.id == this.skinIndex);
+			let tail = store.accessories.find(e => e.id == this.tailIndex);
 
 			let spdMult = (this.buildIndex >= 0 ? .5 : 1) * (wpn?.spdMult || 1) *
 				(skin ? (skin.spdMult || 1) : 1) *
@@ -543,7 +543,7 @@ module.exports = class Player {
 				this.reloads[this.weaponIndex] -= delta;
 			} else if (this.autoGather) {
 				let done = true;
-				let skin = hats.find(e => e.id == this.skinIndex);
+				let skin = store.hats.find(e => e.id == this.skinIndex);
 				let wpn = items.weapons[this.weaponIndex];
 
 				if (wpn.gather != undefined) {

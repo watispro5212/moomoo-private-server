@@ -4,5 +4,6 @@
     "express": "^4.21.2",
     "msgpack-lite": "^0.1.26",
     "ws": "^8.18.0"
-  }
+  },
+  "type": "module"
 }

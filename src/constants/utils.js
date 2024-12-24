@@ -1,18 +1,20 @@
-const msgpack = require("msgpack-lite");
+import msgpack from "msgpack-lite";
 
-module.exports.decodeSocketMessages = (msg) => {
+const UTILS = {};
+
+UTILS.decodeSocketMessages = (msg) => {
     let parsed = msgpack.decode(new Uint8Array(msg));
 
     return [parsed[0], parsed[1]];
 };
 
-module.exports.getDistance = (x1, y1, x2, y2) => {
+UTILS.getDistance = (x1, y1, x2, y2) => {
 	return Math.sqrt((x2 -= x1) * x2 + (y2 -= y1) * y2);
 };
 
 const letters = "qwertyuiopasdfghjklzxcvbnm1234567890QWERTYUIOPASDFGHJKLZXCVBNM";
 
-module.exports.randString = (length) => {
+UTILS.randString = (length) => {
     let result = [];
 
     for (let i = 0; i < length; i++) result.push(letters[Math.floor(Math.random() * letters.length)]);
@@ -20,24 +22,24 @@ module.exports.randString = (length) => {
     return result.join("");
 };
 
-module.exports.randInt = (min, max) => {
+UTILS.randInt = (min, max) => {
     return (Math.random() * (max - min + 1)) + min;
 };
 
-module.exports.fixTo = (num, val) => {
+UTILS.fixTo = (num, val) => {
     return parseFloat(num.toFixed(val));
 };
 
-module.exports.getAngleDist = (a, b) => {
+UTILS.getAngleDist = (a, b) => {
 	let p = Math.abs(b - a) % (Math.PI * 2);
 	return (p > Math.PI ? (Math.PI * 2) - p : p);
 };
 
-module.exports.getDirection = (x1, y1, x2, y2) => {
+UTILS.getDirection = (x1, y1, x2, y2) => {
 	return Math.atan2(y1 - y2, x1 - x2);
 };
 
-module.exports.lineInRect = (recX, recY, recX2, recY2, x1, y1, x2, y2) => {
+UTILS.lineInRect = (recX, recY, recX2, recY2, x1, y1, x2, y2) => {
 	let minX = x1;
 	let maxX = x2;
 
@@ -73,10 +75,12 @@ module.exports.lineInRect = (recX, recY, recX2, recY2, x1, y1, x2, y2) => {
 	return true;
 };
 
-module.exports.getDist = (a, b) => {
+UTILS.getDist = (a, b) => {
 	return Math.hypot(a.y - b.y, a.x - b.x);
 };
 
-module.exports.getDir = (a, b) => {
+UTILS.getDir = (a, b) => {
 	return Math.atan2(a.y - b.y, a.x - b.x);
 };
+
+export default UTILS;

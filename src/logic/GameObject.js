@@ -1,4 +1,10 @@
-module.exports = class GameObject {
+import { players } from "../../index.js";
+import UTILS from "../constants/utils.js";
+import items from "../constants/items.js";
+import ProjectileManager from "./ProjectileManager.js";
+import Packets from "../constants/Packets.js";
+
+export default class GameObject {
     constructor(sid) {
         this.sid = sid;
     }
@@ -72,7 +78,44 @@ module.exports = class GameObject {
 
     update(delta) {
         if (this.active) {
-            // Turret Logic:
+            if (this.name == "turret") {
+                this.turretReload -= delta;
+
+                if (this.turretReload <= 0) {
+                    this.turretReload = 2200;
+
+                    let target = players
+                    .filter(e => e.alive && e.health > 0 && e != this.owner && UTILS.getDistance(this.x, this.y, e.x, e.y) <= 700)
+                    .sort((a, b) => UTILS.getDistance(this.x, this.y, a.x, a.y) - UTILS.getDistance(this.x, this.y, b.x, b.y))[0];
+
+                    if (target) {
+                        let proj = items.projectiles[1];
+                        let dir = UTILS.getDir(target, this);
+
+                        this.dir = dir;
+
+                        for (let i = 0; i < players.length; i++) {
+                            let player = players[i];
+
+                            if (this.sentTo[player.id]) {
+                                player.send(Packets.SERVER_TO_CLIENT.SHOOT_TURRET, this.sid, dir);
+                            }
+                        }
+
+                        ProjectileManager.addProjectile(
+                            this.x,
+                            this.y,
+                            dir,
+                            proj.range,
+                            proj.speed,
+                            1,
+                            this.owner,
+                            null,
+                            this.owner.zIndex
+                        );
+                    }
+                }
+            }
         }
     }
 }

@@ -697,4 +697,4 @@ for (let i = 0; i < list.length; i++) {
     list[i].id = i;
 }
 
-module.exports = { groups, projectiles, weapons, list };
+export default { groups, projectiles, weapons, list };

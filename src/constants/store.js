@@ -1,4 +1,4 @@
-module.exports.hats = [{
+const hats = [{
     id: 45,
     name: "Shame!",
     price: 0,
@@ -317,7 +317,7 @@ module.exports.hats = [{
     invisTimer: 1000
 }];
 
-module.exports.accessories = [{
+const accessories = [{
     id: 12,
     name: "Snowball",
     price: 1000,
@@ -464,3 +464,5 @@ module.exports.accessories = [{
     desc: "deal damage to players that damage you",
     dmg: 0.25
 }];
+
+export default { hats, accessories };

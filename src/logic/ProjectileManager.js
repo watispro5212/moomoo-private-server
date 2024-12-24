@@ -1,8 +1,8 @@
-const items = require("../constants/items");
-const Projectile = require("./Projectile");
-const { projectiles } = require("../../index");
+import items from "../constants/items.js";
+import Projectile from "./Projectile.js";
+import { projectiles } from "../../index.js";
 
-module.exports = class ProjectileManager {
+export default class ProjectileManager {
     static addProjectile(x, y, dir, range, speed, indx, owner, ignoreObj, layer) {
         let tmpData = items.projectiles[indx];
 	    let tmpProj;

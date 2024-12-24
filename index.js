@@ -1,29 +1,25 @@
-require("dotenv").config();
+import { configDotenv } from "dotenv";
+configDotenv();
 
-const express = require("express");
-const WebSocket = require("ws");
+import { WebSocketServer } from "ws";
+import Player from "./src/logic/Players.js";
+import config from "./src/constants/config.js";
+import UTILS from "./src/constants/utils.js";
+import Packets from "./src/constants/Packets.js";
+import store from "./src/constants/store.js";
+import items from "./src/constants/items.js";
+import express from "express";
 
 const app = express();
 const server = app.listen(1234, () => {
     console.log("Server listening on port 1234");
 });
 
-const WebSocketServer = new WebSocket.WebSocketServer({ noServer: true });
+const wss = new WebSocketServer({ noServer: true });
 
-const players = [];
-const gameObjects = [];
-const projectiles = [];
-
-module.exports.players = players;
-module.exports.gameObjects = gameObjects;
-module.exports.projectiles = projectiles;
-
-const Player = require("./src/logic/Players");
-const config = require("./src/constants/config");
-const UTILS = require("./src/constants/utils");
-const Packets = require("./src/constants/Packets");
-const { hats, accessories } = require("./src/constants/store");
-const items = require("./src/constants/items");
+export const players = [];
+export const gameObjects = [];
+export const projectiles = [];
 
 for (let i = 0; i < 150; i++) {
     let player = new Player();
@@ -43,7 +39,7 @@ for (let i = 0; i < 150; i++) {
     }, 100);
 }
 
-WebSocketServer.on("connection", (ws) => {
+wss.on("connection", (ws) => {
     ws.on("message", (msg) => {
         ws.binaryType = "arraybuffer";
 
@@ -80,7 +76,7 @@ WebSocketServer.on("connection", (ws) => {
 
                     if (buy) {
                         if (indx) {
-                            let item = accessories.find(e => e.id == id);
+                            let item = store.accessories.find(e => e.id == id);
 
                             if (item && !player.tails[id] && player.points - item.price >= 0) {
                                 player.tails[id] = 1;
@@ -88,7 +84,7 @@ WebSocketServer.on("connection", (ws) => {
                                 done = true;
                             }
                         } else {
-                            let item = hats.find(e => e.id == id);
+                            let item = store.hats.find(e => e.id == id);
                             
                             if (item && !player.skins[id] && player.points - item.price >= 0) {
                                 player.skins[id] = 1;
@@ -272,7 +268,7 @@ WebSocketServer.on("connection", (ws) => {
                     let player = players[t];
 
                     if (player != players[i]) {
-                        player.send(Packets.SERVER_TO_CLIENT.KILL_OBJECTS, player.sid);
+                        player.send(Packets.SERVER_TO_CLIENT.KILL_OBJECTS, players[i].sid);
                     }
                 }
             }
@@ -341,6 +337,12 @@ setInterval(() => {
         }
     }
 
+    for (let i = 0; i < gameObjects.length; i++) {
+        let tmpObj = gameObjects[i];
+
+        if (tmpObj) tmpObj.update(config.serverUpdateSpeed);
+    }
+
     for (let i = 0; i < projectiles.length; i++) {
         let projectile = projectiles[i];
 
@@ -398,7 +400,7 @@ setInterval(() => {
 }, 3e3);
 
 server.on("upgrade", (request, socket, head) => {
-    WebSocketServer.handleUpgrade(request, socket, head, (ws) => {
-        WebSocketServer.emit("connection", ws, request);
+    wss.handleUpgrade(request, socket, head, (ws) => {
+        wss.emit("connection", ws, request);
     });
 });

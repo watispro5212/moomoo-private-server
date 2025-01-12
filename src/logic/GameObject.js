@@ -103,8 +103,8 @@ export default class GameObject {
                         }
 
                         ProjectileManager.addProjectile(
-                            this.x,
-                            this.y,
+                            this.x + Math.cos(dir) * (this.scale + 20),
+                            this.y + Math.sin(dir) * (this.scale + 20),
                             dir,
                             proj.range,
                             proj.speed,

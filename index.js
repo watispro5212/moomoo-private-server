@@ -31,6 +31,7 @@ for (let i = 0; i < 150; i++) {
     });
     player.spawn();
     player.resetResources();
+    player.autoGather = true;
 
     if (Math.random() > .5) player.skinIndex = 6;
 

@@ -544,7 +544,7 @@ export default class Player {
 			} else if (this.autoGather) {
 				let done = true;
 				let skin = store.hats.find(e => e.id == this.skinIndex);
-				let wpn = items.weapons[this.weaponIndex];
+				let wpn = items.weapons[this.weaponIndex || 0];
 
 				if (wpn.gather != undefined) {
 					this.gather();

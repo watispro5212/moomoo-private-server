@@ -2,7 +2,7 @@ const Packets = {
     CLIENT_TO_SERVER: {
         JOIN_GAME: "M",
         PING_SOCKET: "0",
-        AUTO_GATHER: "K",   
+        AUTO_GATHER: "K",
         MOVE: "9",
         RESET_MOVEMENT_DIR: "e",
         SEND_CHAT: "6",
@@ -10,7 +10,12 @@ const Packets = {
         SEND_AIM: "D",
         SEND_UPGRADE: "H",
         STORE: "c",
-        SELECT_TO_BUILD: "z"
+        SELECT_TO_BUILD: "z",
+        JOIN_CLAN: "b",
+        CREATE_CLAN: "L",
+        LEAVE_CLAN: "N",
+        JOIN_REQUEST: "P",
+        KICK_FROM_CLAN: "Q"
     },
 
     SERVER_TO_CLIENT: {

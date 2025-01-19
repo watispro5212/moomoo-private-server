@@ -20,8 +20,9 @@ const wss = new WebSocketServer({ noServer: true });
 export const players = [];
 export const gameObjects = [];
 export const projectiles = [];
+export const tribes = [];
 
-for (let i = 0; i < 150; i++) {
+for (let i = 0; i < 0; i++) {
     let player = new Player();
     players.push(player);
 
@@ -86,7 +87,7 @@ wss.on("connection", (ws) => {
                             }
                         } else {
                             let item = store.hats.find(e => e.id == id);
-                            
+
                             if (item && !player.skins[id] && player.points - item.price >= 0) {
                                 player.skins[id] = 1;
                                 player.addResource(3, -item.price);
@@ -240,6 +241,8 @@ wss.on("connection", (ws) => {
                         player.weaponXP[player.weaponIndex] = 8e3;
                     } else if (data[0] == "!ruby") {
                         player.weaponXP[player.weaponIndex] = 14e3;
+                    } else if (data[0] == "!k") {
+                        player.changeHealth(-1000);
                     }
 
                     for (let i = 0; i < players.length; i++) {
@@ -249,6 +252,10 @@ wss.on("connection", (ws) => {
                             player.send(Packets.SERVER_TO_CLIENT.RECEIVE_CHAT, ws.NEW_CLIENT.sid, data[0]);
                         }
                     }
+                } else if (type == Packets.CLIENT_TO_SERVER.CREATE_CLAN) {
+                    if (!player.team) return;
+
+                    tribes.push({ sid: data[0], hi: true });
                 }
             }
         } catch (e) {
@@ -321,7 +328,7 @@ setInterval(() => {
 
             for (let i = 0; i < gameObjects.length; i++) {
                 let tmpObj = gameObjects[i];
-        
+
                 if (tmpObj.active) {
                     if (!tmpObj.sentTo[player.id] && tmpObj.visibleToPlayer(player)) {
                         tmpObj.sentTo[player.id] = 1;

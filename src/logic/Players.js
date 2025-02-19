@@ -326,7 +326,7 @@ export default class Player {
 			let done = false;
 
 			if (item.consume) {
-				if (Date.now() - this.hitTime <= 120) {
+				if (Date.now() - this.hitTime < config.serverUpdateSpeed) {
 					this.shameCount++;
 
 					if (this.shameCount >= 8) {

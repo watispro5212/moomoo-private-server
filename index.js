@@ -22,7 +22,7 @@ export const gameObjects = [];
 export const projectiles = [];
 export const tribes = [];
 
-for (let i = 0; i < 0; i++) {
+for (let i = 0; i < 50; i++) {
     let player = new Player();
     players.push(player);
 
@@ -32,7 +32,9 @@ for (let i = 0; i < 0; i++) {
     });
     player.spawn();
     player.resetResources();
-    player.autoGather = true;
+    // player.autoGather = true;
+
+    // player.dir = 1e300;
 
     if (Math.random() > .5) player.skinIndex = 6;
 
@@ -242,7 +244,7 @@ wss.on("connection", (ws) => {
                     } else if (data[0] == "!ruby") {
                         player.weaponXP[player.weaponIndex] = 14e3;
                     } else if (data[0] == "!k") {
-                        player.changeHealth(-1000);
+                        player.kill();
                     }
 
                     for (let i = 0; i < players.length; i++) {

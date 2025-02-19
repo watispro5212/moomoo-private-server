@@ -43,7 +43,7 @@ export default class Player {
 		if (this.ws) {
 			let data = Array.prototype.slice.call(arguments, 1);
 			let binary = msgpack.encode([type, data]);
-	
+
 			this.ws.send(binary);
 		}
 	}
@@ -326,6 +326,19 @@ export default class Player {
 			let done = false;
 
 			if (item.consume) {
+				if (Date.now() - this.hitTime <= 120) {
+					this.shameCount++;
+
+					if (this.shameCount >= 8) {
+						this.shameCount = 0;
+						this.shameTimer = 30e3;
+					}
+				} else {
+					this.shameCount = Math.max(0, this.shameCount - 2);
+				}
+
+				this.hitTime = 0;
+
 				if (this.shameTimer <= 0) {
 					done = true;
 
@@ -396,6 +409,13 @@ export default class Player {
 
 	update(delta) {
 		if (!this.alive) return;
+
+		this.shameTimer -= delta;
+		if (this.shameTimer <= 0) {
+			this.shameTimer = 0;
+		} else {
+			this.skinIndex = 45;
+		}
 
 		this.timerCount -= delta;
 		if (this.timerCount <= 0) {

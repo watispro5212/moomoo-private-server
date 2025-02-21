@@ -22,7 +22,7 @@ export const gameObjects = [];
 export const projectiles = [];
 export const tribes = [];
 
-for (let i = 0; i < 50; i++) {
+for (let i = 0; i < 25; i++) {
     let player = new Player();
     players.push(player);
 
@@ -296,7 +296,27 @@ setInterval(() => {
 
         if (player) {
             player.update(config.serverUpdateSpeed);
+        }
+    }
 
+    for (let i = 0; i < gameObjects.length; i++) {
+        let tmpObj = gameObjects[i];
+
+        if (tmpObj) tmpObj.update(config.serverUpdateSpeed);
+    }
+
+    for (let i = 0; i < projectiles.length; i++) {
+        let projectile = projectiles[i];
+
+        if (projectile && projectile.active) {
+            projectile.update(config.serverUpdateSpeed);
+        }
+    }
+
+    for (let i = 0; i < players.length; i++) {
+        let player = players[i];
+
+        if (player) {
             let data = [];
 
             for (let t = 0; t < players.length; t++) {
@@ -344,20 +364,6 @@ setInterval(() => {
             }
 
             player.send(Packets.SERVER_TO_CLIENT.UPDATE_PLAYERS, data);
-        }
-    }
-
-    for (let i = 0; i < gameObjects.length; i++) {
-        let tmpObj = gameObjects[i];
-
-        if (tmpObj) tmpObj.update(config.serverUpdateSpeed);
-    }
-
-    for (let i = 0; i < projectiles.length; i++) {
-        let projectile = projectiles[i];
-
-        if (projectile && projectile.active) {
-            projectile.update(config.serverUpdateSpeed);
         }
     }
 }, config.serverUpdateSpeed);

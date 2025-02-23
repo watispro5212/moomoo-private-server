@@ -2,10 +2,14 @@ import msgpack from "msgpack-lite";
 
 const UTILS = {};
 
-UTILS.decodeSocketMessages = (msg) => {
-    let parsed = msgpack.decode(new Uint8Array(msg));
+/**
+ * @returns {[string | number, string[] | number[] ]}
+ */
 
-    return [parsed[0], parsed[1]];
+UTILS.decodeSocketMessages = (msg) => {
+	let parsed = msgpack.decode(new Uint8Array(msg));
+
+	return [parsed[0], parsed[1]];
 };
 
 UTILS.getDistance = (x1, y1, x2, y2) => {
@@ -15,19 +19,19 @@ UTILS.getDistance = (x1, y1, x2, y2) => {
 const letters = "qwertyuiopasdfghjklzxcvbnm1234567890QWERTYUIOPASDFGHJKLZXCVBNM";
 
 UTILS.randString = (length) => {
-    let result = [];
+	let result = [];
 
-    for (let i = 0; i < length; i++) result.push(letters[Math.floor(Math.random() * letters.length)]);
+	for (let i = 0; i < length; i++) result.push(letters[Math.floor(Math.random() * letters.length)]);
 
-    return result.join("");
+	return result.join("");
 };
 
 UTILS.randInt = (min, max) => {
-    return (Math.random() * (max - min + 1)) + min;
+	return (Math.random() * (max - min + 1)) + min;
 };
 
 UTILS.fixTo = (num, val) => {
-    return parseFloat(num.toFixed(val));
+	return parseFloat(num.toFixed(val));
 };
 
 UTILS.getAngleDist = (a, b) => {

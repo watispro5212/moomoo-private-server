@@ -33,7 +33,25 @@ export const projectiles = [];
 
 export const tribes = [];
 
-for (let i = 0; i < 25; i++) {
+function spawn(x, y, amount) {
+    for (let i = 0; i < amount; i++) {
+        let player = new Player();
+        players.push(player);
+
+        player.setUserData({
+            name: `BOT:${i}`,
+            skin: 0
+        });
+
+        player.spawn();
+        player.resetResources();
+
+        player.x = x;
+        player.y = y;
+    }
+}
+
+/*for (let i = 0; i < 25; i++) {
     let player = new Player();
     players.push(player);
 
@@ -43,16 +61,13 @@ for (let i = 0; i < 25; i++) {
     });
     player.spawn();
     player.resetResources();
-    // player.autoGather = true;
-
-    // player.dir = 1e300;
 
     if (Math.random() > .5) player.skinIndex = 6;
 
     setInterval(() => {
         if (player.health < 100 && player.alive) for (let t = 0; t < 3; t++) player.buildItem(items.list[player.items[0]]);
     }, 100);
-}
+}*/
 
 wss.on("connection", (ws) => {
     ws.on("message", (msg) => {
@@ -233,7 +248,7 @@ wss.on("connection", (ws) => {
                             player.x = target.x;
                             player.y = target.y;
                         }
-                    } else if (data[0] == "!reset") {
+                    } else if (data[0] == "!reset" || data[0] == "!re") {
                         let oldX = player.x;
                         let oldY = player.y;
 
@@ -248,14 +263,27 @@ wss.on("connection", (ws) => {
 
                         player.send(Packets.SERVER_TO_CLIENT.UPDATE_ITEMS, player.weapons, true);
                         player.send(Packets.SERVER_TO_CLIENT.UPDATE_ITEMS, player.items);
-                    } else if (data[0] == "!gold") {
+                    } else if (data[0] == "!gold" || data[0] == "!g") {
                         player.weaponXP[player.weaponIndex] = 5e3;
-                    } else if (data[0] == "!dia") {
+                    } else if (data[0] == "!dia" || data[0] == "!d") {
                         player.weaponXP[player.weaponIndex] = 8e3;
-                    } else if (data[0] == "!ruby") {
+                    } else if (data[0] == "!ruby" || data[0] == "!r") {
                         player.weaponXP[player.weaponIndex] = 14e3;
                     } else if (data[0] == "!k") {
                         player.kill();
+                    } else if (data[0].startsWith("!s ") || data[0].startsWith("!spawn ")) {
+
+                        /** @type {string[]} */
+
+                        let splited = data[0].split(" ").slice(1);
+
+                        if (splited.length == 1) {
+                            spawn(
+                                UTILS.randInt(player.x - 500, player.x + 500),
+                                UTILS.randInt(player.y - 500, player.y + 500),
+                                parseInt(splited[0]) || 0
+                            );
+                        }
                     }
 
                     for (let i = 0; i < players.length; i++) {

@@ -9,6 +9,8 @@ import Packets from "./src/constants/Packets.js";
 import store from "./src/constants/store.js";
 import items from "./src/constants/items.js";
 import express from "express";
+import GameObject from "./src/logic/GameObject.js";
+import projectile from "./src/logic/Projectile.js";
 
 const app = express();
 const server = app.listen(1234, () => {
@@ -17,9 +19,18 @@ const server = app.listen(1234, () => {
 
 const wss = new WebSocketServer({ noServer: true });
 
+/** @type {Player[]} */
+
 export const players = [];
+
+/** @type {GameObject[]} */
+
 export const gameObjects = [];
+
+/** @type {projectile[]} */
+
 export const projectiles = [];
+
 export const tribes = [];
 
 for (let i = 0; i < 25; i++) {

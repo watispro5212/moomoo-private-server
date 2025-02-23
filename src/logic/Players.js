@@ -326,18 +326,20 @@ export default class Player {
 			let done = false;
 
 			if (item.consume) {
-				if (Date.now() - this.hitTime < config.serverUpdateSpeed) {
-					this.shameCount++;
+				if (this.hitTime) {
+					if (Date.now() - this.hitTime <= config.serverUpdateSpeed) {
+						this.shameCount++;
 
-					if (this.shameCount >= 8) {
-						this.shameCount = 0;
-						this.shameTimer = 30e3;
+						if (this.shameCount >= 8) {
+							this.shameCount = 0;
+							this.shameTimer = 30e3;
+						}
+					} else {
+						this.shameCount = Math.max(0, this.shameCount - 2);
 					}
-				} else {
-					this.shameCount = Math.max(0, this.shameCount - 2);
-				}
 
-				this.hitTime = 0;
+					this.hitTime = 0;
+				}
 
 				if (this.shameTimer <= 0) {
 					done = true;
@@ -528,7 +530,7 @@ export default class Player {
 			for (let i = 0; i < players.length; i++) {
 				let player = players[i];
 
-				if (this != player && player.alive && player.canSee(this) && UTILS.getDist(player, this) <= 700) {
+				if (this != player && player.alive && player.skinIndex != 22 && player.canSee(this) && UTILS.getDist(player, this) <= 700) {
 					enemies.push(player);
 				}
 			}

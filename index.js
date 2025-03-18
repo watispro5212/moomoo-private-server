@@ -33,7 +33,7 @@ export const projectiles = [];
 
 export const tribes = [];
 
-function spawn(x, y, amount) {
+function spawn(x, y, amount, healing, soldier) {
     for (let i = 0; i < amount; i++) {
         let player = new Player();
         players.push(player);
@@ -49,31 +49,17 @@ function spawn(x, y, amount) {
         player.x = UTILS.randInt(x - 500, x + 500);
         player.y = UTILS.randInt(y - 500, y + 500);
 
-        setInterval(() => {
-            if (player.health < 100 && player.alive) {
-                for (let t = 0; t < 2; t++) player.buildItem(items.list[player.items[0]]);
-            }
-        }, config.serverUpdateSpeed);
+        if (soldier) player.skinIndex = 6;
+
+        if (healing) {
+            setInterval(() => {
+                if (player.health < 100 && player.alive) {
+                    for (let t = 0; t < 2; t++) player.buildItem(items.list[player.items[0]]);
+                }
+            }, config.serverUpdateSpeed);
+        }
     }
 }
-
-/*for (let i = 0; i < 25; i++) {
-    let player = new Player();
-    players.push(player);
-
-    player.setUserData({
-        name: `BOT:${i}`,
-        skin: 0
-    });
-    player.spawn();
-    player.resetResources();
-
-    if (Math.random() > .5) player.skinIndex = 6;
-
-    setInterval(() => {
-        if (player.health < 100 && player.alive) for (let t = 0; t < 3; t++) player.buildItem(items.list[player.items[0]]);
-    }, 100);
-}*/
 
 wss.on("connection", (ws) => {
     console.log("new client");
@@ -289,7 +275,8 @@ wss.on("connection", (ws) => {
                                 player.x,
                                 player.y,
                                 parseInt(splited[0]) || 0,
-                                (splited[1] == "on" || splited[1] == "t" || splited[1] == "heal" || splited[1] == "1" || splited[1] == "true")
+                                (splited[1] == "on" || splited[1] == "t" || splited[1] == "h" || splited[1] == "heal" || splited[1] == "1" || splited[1] == "true"),
+                                (splited[2] == "on" || splited[2] == "t" || splited[2] == "s" || splited[2] == "soldier" || splited[2] == "1" || splited[2] == "true")
                             );
                         }
                     }

@@ -46,8 +46,14 @@ function spawn(x, y, amount) {
         player.spawn();
         player.resetResources();
 
-        player.x = x;
-        player.y = y;
+        player.x = UTILS.randInt(x - 500, x + 500);
+        player.y = UTILS.randInt(y - 500, y + 500);
+
+        setInterval(() => {
+            if (player.health < 100 && player.alive) {
+                for (let t = 0; t < 2; t++) player.buildItem(items.list[player.items[0]]);
+            }
+        }, config.serverUpdateSpeed);
     }
 }
 
@@ -70,6 +76,7 @@ function spawn(x, y, amount) {
 }*/
 
 wss.on("connection", (ws) => {
+    console.log("new client");
     ws.on("message", (msg) => {
         ws.binaryType = "arraybuffer";
 
@@ -277,11 +284,12 @@ wss.on("connection", (ws) => {
 
                         let splited = data[0].split(" ").slice(1);
 
-                        if (splited.length == 1) {
+                        if (splited.length >= 1) {
                             spawn(
-                                UTILS.randInt(player.x - 500, player.x + 500),
-                                UTILS.randInt(player.y - 500, player.y + 500),
-                                parseInt(splited[0]) || 0
+                                player.x,
+                                player.y,
+                                parseInt(splited[0]) || 0,
+                                (splited[1] == "on" || splited[1] == "t" || splited[1] == "heal" || splited[1] == "1" || splited[1] == "true")
                             );
                         }
                     }

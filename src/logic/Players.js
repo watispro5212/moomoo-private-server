@@ -25,6 +25,8 @@ export default class Player {
 		this.sid = playerSIDS++;
 		this.id = UTILS.randString(7);
 
+		this.isAI = false;
+
 		this.team = null;
 		this.skinIndex = 0;
 		this.tailIndex = 0;
@@ -365,7 +367,7 @@ export default class Player {
 			let done = false;
 
 			if (item.consume) {
-				if (this.hitTime) {
+				if (this.hitTime && !this.isAI) {
 					if (Date.now() - this.hitTime <= config.serverUpdateSpeed) {
 						this.shameCount++;
 

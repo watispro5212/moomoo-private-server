@@ -7,10 +7,18 @@ import Packets from "../constants/Packets.js";
 import { players, gameObjects } from "../../index.js";
 import ObjectManager from "./ObjectManager.js";
 import ProjectileManager from "./ProjectileManager.js";
+import WebSocket from "ws";
+import GameObject from "./GameObject.js";
 
 var playerSIDS = 0;
 
 export default class Player {
+
+	/**
+	 * 
+	 * @param {WebSocket} ws 
+	 */
+
 	constructor(ws) {
 		this.ws = ws;
 
@@ -39,6 +47,11 @@ export default class Player {
 		}
 	}
 
+	/**
+	 * 
+	 * @param {string | number} type 
+	 */
+
 	send(type) {
 		if (this.ws) {
 			let data = Array.prototype.slice.call(arguments, 1);
@@ -51,6 +64,11 @@ export default class Player {
 	resetMoveDir() {
 		this.moveDir = undefined;
 	}
+
+	/**
+	 * @param {Player} other 
+	 * @returns {boolean}
+	 */
 
 	canSee(other) {
 		if (!other) return false;
@@ -95,8 +113,6 @@ export default class Player {
 		this.kills = 0;
 		this.upgrAge = 2;
 		this.upgradePoints = 0;
-
-		this.weaponVaraint = 0;
 
 		this.x = UTILS.randInt(0, config.mapScale);
 		this.y = UTILS.randInt(0, config.mapScale);
@@ -145,10 +161,20 @@ export default class Player {
 		];
 	}
 
+	/**
+	 * @param {number} amnt 
+	 */
+
 	addWeaponXP(amnt) {
 		if (!this.weaponXP[this.weaponIndex]) this.weaponXP[this.weaponIndex] = 0;
 		this.weaponXP[this.weaponIndex] += amnt;
 	}
+
+	/**
+	 * @param {string} type 
+	 * @param {number} amount 
+	 * @param {boolean} auto 
+	 */
 
 	addResource(type, amount, auto) {
 		if (!auto && amount > 0) this.addWeaponXP(amount);
@@ -161,6 +187,10 @@ export default class Player {
 			1
 		);
 	}
+
+	/**
+	 * @param {number} amount 
+	 */
 
 	earnXP(amount) {
 		if (this.age < config.maxAge) {
@@ -292,6 +322,10 @@ export default class Player {
 		}
 	}
 
+	/**
+	 * @param {Player | GameObject} doer 
+	 */
+
 	kill(doer) {
 		if (doer && doer.alive) {
 			doer.kills++;
@@ -301,6 +335,11 @@ export default class Player {
 		this.alive = false;
 		this.send(Packets.SERVER_TO_CLIENT.KILL_PLAYER);
 	}
+
+	/**
+	 * @param {number} id 
+	 * @param {number} value 
+	 */
 
 	changeItemCount(id, value) {
 		this.itemCounts[id] = this.itemCounts[id] || 0;
@@ -378,6 +417,11 @@ export default class Player {
 		}
 	}
 
+	/**
+	 * @param {number} amount 
+	 * @param {Player | GameObject} doer 
+	 */
+
 	changeHealth(amount, doer) {
 		if (amount > 0 && this.health >= this.maxHealth) return false
 
@@ -408,6 +452,10 @@ export default class Player {
 
 		return true;
 	}
+
+	/**
+	 * @param {number} delta 
+	 */
 
 	update(delta) {
 		if (!this.alive) return;

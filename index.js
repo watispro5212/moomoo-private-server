@@ -46,8 +46,10 @@ function spawn(x, y, amount, healing, soldier) {
         player.spawn();
         player.resetResources();
 
-        player.x = UTILS.randInt(x - 500, x + 500);
-        player.y = UTILS.randInt(y - 500, y + 500);
+        player.x = UTILS.randInt(x - 1e3, x + 1e3);
+        player.y = UTILS.randInt(y - 1e3, y + 1e3);
+
+        player.isAI = true;
 
         if (soldier) player.skinIndex = 6;
 

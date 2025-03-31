@@ -4,8 +4,22 @@ import ObjectManager from "./ObjectManager.js";
 import items from "../constants/items.js";
 import config from "../constants/config.js";
 import UTILS from "../constants/utils.js";
+import Player from "./Players.js";
 
 export default class projectile {
+
+    /**
+     * @param {number} indx 
+     * @param {number} x 
+     * @param {number} y 
+     * @param {number} dir 
+     * @param {number} spd 
+     * @param {number} dmg 
+     * @param {number} rng 
+     * @param {number} scl 
+     * @param {Player} owner 
+     */
+
     init(indx, x, y, dir, spd, dmg, rng, scl, owner) {
         this.active = true;
         this.indx = indx;
@@ -22,6 +36,10 @@ export default class projectile {
         this.owner = owner;
         this.sentTo = {};
     }
+
+    /**
+     * @param {number} delta 
+     */
 
     update(delta) {
         let tmpSpeed = this.speed * delta;

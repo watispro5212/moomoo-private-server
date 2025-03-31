@@ -58,13 +58,14 @@ function spawn(x, y, amount, healing, soldier) {
                 if (player.health < 100 && player.alive) {
                     for (let t = 0; t < 2; t++) player.buildItem(items.list[player.items[0]]);
                 }
-            }, config.serverUpdateSpeed);
+            }, 50);
         }
     }
 }
 
 wss.on("connection", (ws) => {
     console.log("new client");
+
     ws.on("message", (msg) => {
         ws.binaryType = "arraybuffer";
 

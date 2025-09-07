@@ -33,7 +33,7 @@ export const projectiles = [];
 
 export const tribes = [];
 
-function spawn(x, y, amount, healing, soldier) {
+function spawn(x, y, amount, healing, soldier, move) {
     for (let i = 0; i < amount; i++) {
         let player = new Player();
         players.push(player);
@@ -46,12 +46,20 @@ function spawn(x, y, amount, healing, soldier) {
         player.spawn();
         player.resetResources();
 
-        player.x = UTILS.randInt(x - 1e3, x + 1e3);
-        player.y = UTILS.randInt(y - 1e3, y + 1e3);
+        player.x = UTILS.randInt(x - 500, x + 500);
+        player.y = UTILS.randInt(y - 500, y + 500);
 
         player.isAI = true;
 
         if (soldier) player.skinIndex = 6;
+
+        if (move) {
+            player.moveDir = 0;
+
+            setInterval(() => {
+                player.moveDir = player.moveDir === 0 ? -Math.PI : 0;
+            }, 1500);
+        }
 
         if (healing) {
             setInterval(() => {
@@ -267,21 +275,65 @@ wss.on("connection", (ws) => {
                         player.weaponXP[player.weaponIndex] = 14e3;
                     } else if (data[0] == "!k") {
                         player.kill();
-                    } else if (data[0].startsWith("!s ") || data[0].startsWith("!spawn ")) {
-
-                        /** @type {string[]} */
-
-                        let splited = data[0].split(" ").slice(1);
-
-                        if (splited.length >= 1) {
-                            spawn(
-                                player.x,
-                                player.y,
-                                parseInt(splited[0]) || 0,
-                                (splited[1] == "on" || splited[1] == "t" || splited[1] == "h" || splited[1] == "heal" || splited[1] == "1" || splited[1] == "true"),
-                                (splited[2] == "on" || splited[2] == "t" || splited[2] == "s" || splited[2] == "soldier" || splited[2] == "1" || splited[2] == "true")
-                            );
-                        }
+                    } else if (data[0] === "!s") {
+                        spawn(
+                            player.x,
+                            player.y,
+                            1,
+                            false,
+                            false
+                        );
+                    } else if (data[0] === "!ss") {
+                        spawn(
+                            player.x,
+                            player.y,
+                            1,
+                            false,
+                            true
+                        );
+                    } else if (data[0] === "!sh") {
+                        spawn(
+                            player.x,
+                            player.y,
+                            1,
+                            true,
+                            false
+                        );
+                    } else if (data[0] === "!ssh") {
+                        spawn(
+                            player.x,
+                            player.y,
+                            1,
+                            true,
+                            true
+                        );
+                    } else if (data[0] === "!sm") {
+                        spawn(
+                            player.x,
+                            player.y,
+                            1,
+                            false,
+                            false,
+                            true
+                        );
+                    } else if (data[0] === "!ssm") {
+                        spawn(
+                            player.x,
+                            player.y,
+                            1,
+                            false,
+                            true,
+                            true
+                        );
+                    } else if (data[0] === "!ssmh") {
+                        spawn(
+                            player.x,
+                            player.y,
+                            1,
+                            true,
+                            true,
+                            true
+                        );
                     }
 
                     for (let i = 0; i < players.length; i++) {

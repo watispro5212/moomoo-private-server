@@ -92,7 +92,7 @@ export default class ObjectManager {
 
             let tmpInt = Math.sqrt(dx * dx + dy * dy) - tmpLen;
 
-            if (tmpInt <= 0) {
+            if (tmpInt <= 0 && other.active) {
                 if (!other.ignoreCollision) {
                     let tmpDir = UTILS.getDirection(player.x, player.y, other.x, other.y);
 

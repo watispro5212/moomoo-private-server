@@ -11,6 +11,7 @@ import items from "./src/constants/items.js";
 import express from "express";
 import GameObject from "./src/logic/GameObject.js";
 import projectile from "./src/logic/Projectile.js";
+import ObjectManager from "./src/logic/ObjectManager.js";
 
 const app = express();
 const server = app.listen(1234, () => {
@@ -50,6 +51,7 @@ function spawn(x, y, amount, healing, soldier, move) {
         player.y = UTILS.randInt(y - 500, y + 500);
 
         player.isAI = true;
+        player.weaponIndex = 5;
 
         if (soldier) player.skinIndex = 6;
 
@@ -243,6 +245,31 @@ wss.on("connection", (ws) => {
                             player.x = nearest.x;
                             player.y = nearest.y;
                         }
+                    } else if (data[0] === "!kms") {
+                        const spike = items.list[9];
+                        const trap = items.list[15];
+
+                        ObjectManager.add(
+                            gameObjects.length,
+                            player.x,
+                            player.y + 35,
+                            0,
+                            trap.scale,
+                            trap.type,
+                            trap,
+                            false
+                        );
+
+                        ObjectManager.add(
+                            gameObjects.length,
+                            player.x,
+                            player.y - (50 + spike.scale - 35),
+                            0,
+                            spike.scale,
+                            spike.type,
+                            spike,
+                            false
+                        );
                     } else if (data[0].includes("!tp ")) {
                         let split = data[0].split(" ");
 
@@ -369,6 +396,12 @@ wss.on("connection", (ws) => {
                     if (player != players[i]) {
                         player.send(Packets.SERVER_TO_CLIENT.KILL_OBJECTS, players[i].sid);
                     }
+                }
+            }
+
+            for (let i = 0; i < gameObjects.length; i++) {
+                if (gameObjects[i].owner === ws.NEW_CLIENT) {
+                    gameObjects[i].active = false;
                 }
             }
 

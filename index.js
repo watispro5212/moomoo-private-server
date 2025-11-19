@@ -310,6 +310,14 @@ wss.on("connection", (ws) => {
                             false,
                             false
                         );
+                    } else if (data[0] === "!s50") {
+                        spawn(
+                            player.x,
+                            player.y,
+                            50,
+                            false,
+                            false
+                        );
                     } else if (data[0] === "!ss") {
                         spawn(
                             player.x,

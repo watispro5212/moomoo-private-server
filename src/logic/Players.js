@@ -59,7 +59,9 @@ export default class Player {
             let data = Array.prototype.slice.call(arguments, 1);
             let binary = msgpack.encode([type, data]);
 
-            this.ws.send(binary);
+            setTimeout(() => {
+                this.ws.send(binary);
+            }, 15);
         }
     }
 
@@ -336,10 +338,6 @@ export default class Player {
 
         this.alive = false;
         this.send(Packets.SERVER_TO_CLIENT.KILL_PLAYER);
-
-        if (this.isAI) {
-            players.splice(players.indexOf(this), 1);
-        }
     }
 
     /**

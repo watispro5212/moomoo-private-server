@@ -34,6 +34,22 @@ export const projectiles = [];
 
 export const tribes = [];
 
+const item = items.list[9];
+for (let i = 0; i < config.mapScale; i += config.mapScale / 25) {
+    for (let j = 0; j < config.mapScale; j += config.mapScale / 25) {
+        ObjectManager.add(
+            gameObjects.length,
+            i,
+            j,
+            0,
+            item.scale,
+            item.type,
+            item,
+            false
+        );
+    }
+}
+
 function spawn(x, y, amount, healing, soldier, move) {
     for (let i = 0; i < amount; i++) {
         let player = new Player();
@@ -493,7 +509,7 @@ setInterval(() => {
                 let tmpObj = gameObjects[i];
 
                 if (tmpObj.active) {
-                    if (!tmpObj.sentTo[player.id] && tmpObj.visibleToPlayer(player)) {
+                    if (!tmpObj.sentTo[player.id] && player.canSee(tmpObj) && tmpObj.visibleToPlayer(player)) {
                         tmpObj.sentTo[player.id] = 1;
                         gameObjectsData.push(tmpObj.sid, tmpObj.x, tmpObj.y, tmpObj.dir, tmpObj.scale, tmpObj.type, tmpObj.id, tmpObj?.owner?.sid);
                     }

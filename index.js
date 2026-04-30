@@ -15,7 +15,7 @@ import ObjectManager from "./src/logic/ObjectManager.js";
 
 const app = express();
 app.get("/", (req, res) => {
-    res.send("<h1>Glotus Private Server</h1><p>The server is running on port 1234.</p><p>Connect via WebSocket to start playing.</p>");
+    res.send("<h1>Lotus Private Server</h1><p>The server is running on port 1234.</p><p>Connect via WebSocket to start playing.</p>");
 });
 const server = app.listen(1234, () => {
     console.log("Server listening on port 1234");
